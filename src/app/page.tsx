@@ -145,15 +145,28 @@ export default function HomePage() {
               </div>
 
               <div className="relative">
-                <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-blue-500 text-white">
+                <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-blue-100 text-blue-600">
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                 </div>
-                <p className="ml-16 text-lg leading-6 font-medium text-gray-900">Dashboard Analytics</p>
-                <p className="mt-2 ml-16 text-base text-gray-500">
-                  Track your invoicing performance with comprehensive analytics and insights.
-                </p>
+                <div className="ml-16">
+                  <div className="flex items-center space-x-2">
+                    <p className="text-lg leading-6 font-medium text-gray-900">Dashboard Analytics</p>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                      Coming Soon
+                    </span>
+                  </div>
+                  <p className="mt-2 text-base text-gray-500">
+                    Advanced analytics and insights coming soon! Track revenue trends, client performance, and invoice metrics with beautiful charts and reports.
+                  </p>
+                  <div className="mt-3 flex items-center text-sm text-blue-600">
+                    <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span className="font-medium">Expected in Phase 2</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
