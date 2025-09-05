@@ -74,8 +74,36 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen bg-gray-50">
+      {/* Navigation */}
+      <nav className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex items-center">
+              <Link href="/" className="text-xl font-bold text-blue-600">
+                SwiftInvoice
+              </Link>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Link
+                href="/"
+                className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
+              >
+                Home
+              </Link>
+              <Link
+                href="/auth/signin"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+              >
+                Sign In
+              </Link>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Create your SwiftInvoice account
@@ -170,6 +198,7 @@ export default function SignUpPage() {
             </button>
           </div>
         </form>
+        </div>
       </div>
     </div>
   )
