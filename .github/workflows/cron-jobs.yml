@@ -1,0 +1,30 @@
+name: Cron Jobs
+
+on:
+  schedule:
+    # Run every day at 9:00 AM UTC for recurring invoices
+    - cron: '0 9 * * *'
+    # Run every day at 10:00 AM UTC for reminders
+    - cron: '0 10 * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  recurring-invoices:
+    if: github.event.schedule == '0 9 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Recurring Invoices
+        run: |
+          curl -X POST "${{ secrets.APP_URL }}/api/cron/recurring" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json"
+
+  reminders:
+    if: github.event.schedule == '0 10 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Reminders
+        run: |
+          curl -X POST "${{ secrets.APP_URL }}/api/cron/reminders" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json"

@@ -85,9 +85,12 @@ export async function POST(request: NextRequest) {
             })
             invoiceNumber = `INV-${String(invoiceCount + attempts).padStart(4, '0')}`
             
-            // Check if this invoice number already exists
-            const existingInvoice = await tx.invoice.findUnique({
-              where: { invoiceNumber }
+            // Check if this invoice number already exists for this user
+            const existingInvoice = await tx.invoice.findFirst({
+              where: { 
+                userId: session.user.id,
+                invoiceNumber 
+              }
             })
             
             if (!existingInvoice) {

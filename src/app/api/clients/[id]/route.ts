@@ -7,7 +7,7 @@ import { clientSchema } from '@/lib/validations'
 // GET /api/clients/[id] - Get a specific client
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -19,9 +19,10 @@ export async function GET(
       )
     }
     
+    const { id } = await params
     const client = await prisma.client.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id
       }
     })
@@ -47,7 +48,7 @@ export async function GET(
 // PUT /api/clients/[id] - Update a client
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -59,13 +60,14 @@ export async function PUT(
       )
     }
     
+    const { id } = await params
     const body = await request.json()
     const validatedData = clientSchema.parse(body)
     
     // Check if client exists and belongs to user
     const existingClient = await prisma.client.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id
       }
     })
@@ -78,7 +80,7 @@ export async function PUT(
     }
     
     const updatedClient = await prisma.client.update({
-      where: { id: params.id },
+      where: { id },
       data: validatedData
     })
     
@@ -102,7 +104,7 @@ export async function PUT(
 // DELETE /api/clients/[id] - Delete a client
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -114,10 +116,11 @@ export async function DELETE(
       )
     }
     
+    const { id } = await params
     // Check if client exists and belongs to user
     const existingClient = await prisma.client.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id
       }
     })
@@ -130,7 +133,7 @@ export async function DELETE(
     }
     
     await prisma.client.delete({
-      where: { id: params.id }
+      where: { id }
     })
     
     return NextResponse.json(
@@ -145,4 +148,3 @@ export async function DELETE(
     )
   }
 }
-

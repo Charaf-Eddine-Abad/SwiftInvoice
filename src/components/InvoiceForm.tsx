@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { invoiceSchema, InvoiceInput, InvoiceItemInput } from '@/lib/validations'
+import { invoiceSchema, InvoiceFormInput } from '@/lib/validations'
 
 interface Client {
   id: string
@@ -12,9 +12,9 @@ interface Client {
 }
 
 interface InvoiceFormProps {
-  invoice?: InvoiceInput & { id?: string }
+  invoice?: InvoiceFormInput & { id?: string }
   clients: Client[]
-  onSubmit: (data: InvoiceInput) => Promise<void>
+  onSubmit: (data: InvoiceFormInput) => Promise<void>
   onCancel: () => void
 }
 
@@ -28,8 +28,7 @@ export default function InvoiceForm({ invoice, clients, onSubmit, onCancel }: In
     watch,
     formState: { errors },
     reset,
-    setValue
-  } = useForm<InvoiceInput>({
+  } = useForm<InvoiceFormInput>({
     resolver: zodResolver(invoiceSchema),
     defaultValues: invoice || {
       clientId: '',
@@ -58,10 +57,16 @@ export default function InvoiceForm({ invoice, clients, onSubmit, onCancel }: In
   const taxAmount = (subtotal * (watchedTax || 0)) / 100
   const finalTotal = subtotal + taxAmount - (watchedDiscount || 0)
 
-  const handleFormSubmit = async (data: InvoiceInput) => {
+  const handleFormSubmit = async (data: InvoiceFormInput) => {
     try {
       setIsSubmitting(true)
-      await onSubmit(data)
+      // Ensure tax and discount are numbers, not undefined
+      const formData = {
+        ...data,
+        tax: data.tax || 0,
+        discount: data.discount || 0
+      }
+      await onSubmit(formData)
       reset()
     } catch (error) {
       console.error('Error submitting form:', error)
@@ -287,4 +292,3 @@ export default function InvoiceForm({ invoice, clients, onSubmit, onCancel }: In
     </form>
   )
 }
-

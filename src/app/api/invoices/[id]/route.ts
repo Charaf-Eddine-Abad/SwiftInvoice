@@ -7,7 +7,7 @@ import { invoiceSchema, invoiceStatusSchema } from '@/lib/validations'
 // GET /api/invoices/[id] - Get a specific invoice
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -19,9 +19,10 @@ export async function GET(
       )
     }
     
+    const { id } = await params
     const invoice = await prisma.invoice.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id
       },
       include: {
@@ -51,7 +52,7 @@ export async function GET(
 // PUT /api/invoices/[id] - Update an invoice
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -63,13 +64,14 @@ export async function PUT(
       )
     }
     
+    const { id } = await params
     const body = await request.json()
     const validatedData = invoiceSchema.parse(body)
     
     // Check if invoice exists and belongs to user
     const existingInvoice = await prisma.invoice.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id
       }
     })
@@ -93,7 +95,7 @@ export async function PUT(
     const updatedInvoice = await prisma.$transaction(async (tx) => {
       // Update invoice
       const invoice = await tx.invoice.update({
-        where: { id: params.id },
+        where: { id },
         data: {
           clientId: validatedData.clientId,
           issueDate: new Date(validatedData.issueDate),
@@ -106,7 +108,7 @@ export async function PUT(
       
       // Delete existing items
       await tx.invoiceItem.deleteMany({
-        where: { invoiceId: params.id }
+        where: { invoiceId: id }
       })
       
       // Create new items
@@ -114,7 +116,7 @@ export async function PUT(
         validatedData.items.map(item =>
           tx.invoiceItem.create({
             data: {
-              invoiceId: params.id,
+              invoiceId: id,
               description: item.description,
               quantity: item.quantity,
               unitPrice: item.unitPrice,
@@ -147,7 +149,7 @@ export async function PUT(
 // DELETE /api/invoices/[id] - Delete an invoice
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -159,10 +161,11 @@ export async function DELETE(
       )
     }
     
+    const { id } = await params
     // Check if invoice exists and belongs to user
     const existingInvoice = await prisma.invoice.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id
       }
     })
@@ -176,7 +179,7 @@ export async function DELETE(
     
     // Delete invoice (items will be deleted automatically due to cascade)
     await prisma.invoice.delete({
-      where: { id: params.id }
+      where: { id }
     })
     
     return NextResponse.json(
@@ -195,7 +198,7 @@ export async function DELETE(
 // PATCH /api/invoices/[id]/status - Update invoice status
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -207,13 +210,14 @@ export async function PATCH(
       )
     }
     
+    const { id } = await params
     const body = await request.json()
     const validatedData = invoiceStatusSchema.parse(body)
     
     // Check if invoice exists and belongs to user
     const existingInvoice = await prisma.invoice.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id
       }
     })
@@ -226,7 +230,7 @@ export async function PATCH(
     }
     
     const updatedInvoice = await prisma.invoice.update({
-      where: { id: params.id },
+      where: { id },
       data: { status: validatedData.status }
     })
     
@@ -246,4 +250,3 @@ export async function PATCH(
     )
   }
 }
-

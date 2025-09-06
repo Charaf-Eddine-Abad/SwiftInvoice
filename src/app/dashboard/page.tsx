@@ -9,7 +9,10 @@ import {
   PlusIcon, 
   DocumentTextIcon, 
   UsersIcon, 
-  CurrencyDollarIcon 
+  CurrencyDollarIcon,
+  ClockIcon,
+  BellIcon,
+  CreditCardIcon
 } from '@heroicons/react/24/outline'
 
 interface DashboardStats {
@@ -197,6 +200,104 @@ export default function DashboardPage() {
                   Create New Invoice
                 </Link>
               </div>
+            </div>
+          </div>
+
+          {/* Phase 2 Features */}
+          <div className="mb-8">
+            <h2 className="text-lg font-medium text-gray-900 mb-4">Advanced Features</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Link
+                href="/dashboard/recurring-invoices"
+                className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow"
+              >
+                <div className="p-5">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <ClockIcon className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <div className="ml-5 w-0 flex-1">
+                      <dl>
+                        <dt className="text-sm font-medium text-gray-500 truncate">
+                          Recurring Invoices
+                        </dt>
+                        <dd className="text-sm text-gray-900">
+                          Automate invoice generation
+                        </dd>
+                      </dl>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+
+              <Link
+                href="/dashboard/expenses"
+                className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow"
+              >
+                <div className="p-5">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <CurrencyDollarIcon className="h-6 w-6 text-green-600" />
+                    </div>
+                    <div className="ml-5 w-0 flex-1">
+                      <dl>
+                        <dt className="text-sm font-medium text-gray-500 truncate">
+                          Expense Tracking
+                        </dt>
+                        <dd className="text-sm text-gray-900">
+                          Track business expenses
+                        </dd>
+                      </dl>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+
+              <Link
+                href="/dashboard/reminders"
+                className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow"
+              >
+                <div className="p-5">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <BellIcon className="h-6 w-6 text-yellow-600" />
+                    </div>
+                    <div className="ml-5 w-0 flex-1">
+                      <dl>
+                        <dt className="text-sm font-medium text-gray-500 truncate">
+                          Reminder Policies
+                        </dt>
+                        <dd className="text-sm text-gray-900">
+                          Automated reminders
+                        </dd>
+                      </dl>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+
+              <Link
+                href="/dashboard/payments"
+                className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow"
+              >
+                <div className="p-5">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <CreditCardIcon className="h-6 w-6 text-purple-600" />
+                    </div>
+                    <div className="ml-5 w-0 flex-1">
+                      <dl>
+                        <dt className="text-sm font-medium text-gray-500 truncate">
+                          Payment Processing
+                        </dt>
+                        <dd className="text-sm text-gray-900">
+                          Coming soon
+                        </dd>
+                      </dl>
+                    </div>
+                  </div>
+                </div>
+              </Link>
             </div>
           </div>
 

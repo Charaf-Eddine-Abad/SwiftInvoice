@@ -7,7 +7,11 @@ import {
   HomeIcon, 
   UsersIcon, 
   DocumentTextIcon, 
-  ArrowRightOnRectangleIcon 
+  ArrowRightOnRectangleIcon,
+  ClockIcon,
+  CurrencyDollarIcon,
+  BellIcon,
+  CreditCardIcon
 } from '@heroicons/react/24/outline'
 
 export default function Navigation() {
@@ -18,6 +22,10 @@ export default function Navigation() {
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
     { name: 'Clients', href: '/clients', icon: UsersIcon },
     { name: 'Invoices', href: '/invoices', icon: DocumentTextIcon },
+    { name: 'Recurring', href: '/dashboard/recurring-invoices', icon: ClockIcon },
+    { name: 'Expenses', href: '/dashboard/expenses', icon: CurrencyDollarIcon },
+    { name: 'Reminders', href: '/dashboard/reminders', icon: BellIcon },
+    { name: 'Payments', href: '/dashboard/payments', icon: CreditCardIcon },
   ]
 
   if (!session) return null

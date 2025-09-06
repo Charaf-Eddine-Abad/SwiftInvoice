@@ -28,6 +28,9 @@ model User {
   sessions          Session[]
   emailVerifications EmailVerification[]
   passwordResets    PasswordReset[]
+  recurringInvoices RecurringInvoice[]
+  reminderPolicies  ReminderPolicy[]
+  expenses          Expense[]
 
   @@map("users")
 }
@@ -47,6 +50,7 @@ model Client {
   // Relationships
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   invoices Invoice[]
+  recurringInvoices RecurringInvoice[]
 
   @@map("clients")
 }
@@ -56,7 +60,8 @@ model Invoice {
   id            String        @id @default(cuid())
   userId        String        @map("user_id")
   clientId      String        @map("client_id")
-  invoiceNumber String        @unique @map("invoice_number")
+  invoiceNumber String        @map("invoice_number")
+  publicId      String?       @unique @default(cuid()) @map("public_id")
   status        InvoiceStatus @default(DRAFT)
   issueDate     DateTime      @map("issue_date")
   dueDate       DateTime      @map("due_date")
@@ -71,6 +76,8 @@ model Invoice {
   client       Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
   invoiceItems InvoiceItem[]
 
+  // Composite unique constraint: invoice number must be unique per user
+  @@unique([userId, invoiceNumber])
   @@map("invoices")
 }
 
@@ -170,4 +177,103 @@ model PasswordReset {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("password_resets")
+}
+
+// Phase 2 Models
+
+// Recurring Invoice model for automated invoice generation
+model RecurringInvoice {
+  id            String              @id @default(cuid())
+  userId        String              @map("user_id")
+  clientId      String              @map("client_id")
+  name          String
+  description   String?
+  frequency     RecurringFrequency
+  interval      Int                 @default(1) // Every X weeks/months
+  startDate     DateTime            @map("start_date")
+  nextRunAt     DateTime            @map("next_run_at")
+  isActive      Boolean             @default(true) @map("is_active")
+  tax           Decimal             @default(0) @db.Decimal(10, 2)
+  discount      Decimal             @default(0) @db.Decimal(10, 2)
+  createdAt     DateTime            @default(now()) @map("created_at")
+  updatedAt     DateTime            @updatedAt @map("updated_at")
+
+  // Relationships
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client       Client              @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  lineItems    RecurringLineItem[]
+
+  @@map("recurring_invoices")
+}
+
+// Recurring Line Item model for recurring invoice items
+model RecurringLineItem {
+  id                String          @id @default(cuid())
+  recurringInvoiceId String         @map("recurring_invoice_id")
+  description       String
+  quantity          Decimal         @db.Decimal(10, 2)
+  unitPrice         Decimal         @map("unit_price") @db.Decimal(10, 2)
+  total             Decimal         @db.Decimal(10, 2)
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+
+  // Relationships
+  recurringInvoice RecurringInvoice @relation(fields: [recurringInvoiceId], references: [id], onDelete: Cascade)
+
+  @@map("recurring_line_items")
+}
+
+// Reminder Policy model for automated invoice reminders
+model ReminderPolicy {
+  id                String   @id @default(cuid())
+  userId            String   @map("user_id")
+  name              String
+  reminderDays      Int[]    @map("reminder_days") // Days after due date to send reminders
+  isActive          Boolean  @default(true) @map("is_active")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("reminder_policies")
+}
+
+// Expense model for expense tracking
+model Expense {
+  id          String        @id @default(cuid())
+  userId      String        @map("user_id")
+  date        DateTime
+  amount      Decimal       @db.Decimal(10, 2)
+  currency    String        @default("USD")
+  category    ExpenseCategory
+  vendor      String
+  description String
+  receiptUrl  String?       @map("receipt_url")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("expenses")
+}
+
+// Enums for Phase 2
+enum RecurringFrequency {
+  WEEKLY
+  MONTHLY
+}
+
+enum ExpenseCategory {
+  OFFICE_SUPPLIES
+  TRAVEL
+  MEALS
+  SOFTWARE
+  MARKETING
+  PROFESSIONAL_SERVICES
+  UTILITIES
+  RENT
+  EQUIPMENT
+  OTHER
 }
