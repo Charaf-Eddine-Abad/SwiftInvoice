@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Navigation from '@/components/Navigation'
 import InvoiceForm from '@/components/InvoiceForm'
-import { InvoiceInput } from '@/lib/validations'
+import { InvoiceInput, InvoiceFormInput } from '@/lib/validations'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 
 interface Client {
@@ -46,14 +46,21 @@ export default function NewInvoicePage() {
     }
   }
 
-  const handleSubmit = async (data: InvoiceInput) => {
+  const handleSubmit = async (data: InvoiceFormInput) => {
     try {
+      // Ensure tax and discount are numbers
+      const processedData = {
+        ...data,
+        tax: data.tax || 0,
+        discount: data.discount || 0,
+      }
+      
       const response = await fetch('/api/invoices', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(processedData),
       })
 
       if (response.ok) {

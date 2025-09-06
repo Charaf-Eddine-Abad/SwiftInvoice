@@ -5,7 +5,7 @@ import { prisma } from './prisma'
 import { verifyPassword } from './auth'
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  // adapter: PrismaAdapter(prisma), // Temporarily disabled for build compatibility
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -55,7 +55,6 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/auth/signin',
-    signUp: '/auth/signup',
   },
   callbacks: {
     async jwt({ token, user }) {

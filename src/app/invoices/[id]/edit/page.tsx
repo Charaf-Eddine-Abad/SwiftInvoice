@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useParams, useRouter } from 'next/navigation'
 import Navigation from '@/components/Navigation'
 import InvoiceForm from '@/components/InvoiceForm'
-import { InvoiceInput } from '@/lib/validations'
+import { InvoiceInput, InvoiceFormInput } from '@/lib/validations'
 
 interface Client {
   id: string
@@ -64,12 +64,19 @@ export default function EditInvoicePage() {
     }
   }
 
-  const handleSubmit = async (payload: InvoiceInput) => {
+  const handleSubmit = async (payload: InvoiceFormInput) => {
     try {
+      // Ensure tax and discount are numbers
+      const processedPayload = {
+        ...payload,
+        tax: payload.tax || 0,
+        discount: payload.discount || 0,
+      }
+      
       const res = await fetch(`/api/invoices/${params.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(processedPayload),
       })
       if (!res.ok) {
         const err = await res.json()

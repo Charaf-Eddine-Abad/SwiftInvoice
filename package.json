@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "prisma generate && next build --turbopack",
     "start": "next start",
     "lint": "eslint",
+    "postinstall": "prisma generate",
     "cron:service": "node scripts/cron-service.js",
     "cron:test": "node scripts/test-cron.js",
     "cron:setup": "chmod +x scripts/setup-local-cron.sh && ./scripts/setup-local-cron.sh"

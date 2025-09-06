@@ -6,7 +6,7 @@ import { prisma } from '@/lib/prisma'
 // GET /api/invoices/[id]/pdf - Generate PDF for an invoice
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -18,10 +18,12 @@ export async function GET(
       )
     }
     
+    const { id } = await params
+    
     // Fetch invoice with client and items
     const invoice = await prisma.invoice.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id
       },
       include: {
