@@ -13,18 +13,36 @@ jobs:
     if: github.event.schedule == '0 9 * * *' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
+      - name: Debug Environment
+        run: |
+          echo "APP_URL: ${{ secrets.APP_URL }}"
+          echo "CRON_SECRET: ${{ secrets.CRON_SECRET }}"
       - name: Trigger Recurring Invoices
         run: |
+          if [ -z "${{ secrets.APP_URL }}" ]; then
+            echo "❌ APP_URL secret is not set!"
+            exit 1
+          fi
           curl -X POST "${{ secrets.APP_URL }}/api/cron/recurring" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            -H "Content-Type: application/json"
+            -H "Content-Type: application/json" \
+            -v
 
   reminders:
     if: github.event.schedule == '0 10 * * *' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
+      - name: Debug Environment
+        run: |
+          echo "APP_URL: ${{ secrets.APP_URL }}"
+          echo "CRON_SECRET: ${{ secrets.CRON_SECRET }}"
       - name: Trigger Reminders
         run: |
+          if [ -z "${{ secrets.APP_URL }}" ]; then
+            echo "❌ APP_URL secret is not set!"
+            exit 1
+          fi
           curl -X POST "${{ secrets.APP_URL }}/api/cron/reminders" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            -H "Content-Type: application/json"
+            -H "Content-Type: application/json" \
+            -v
