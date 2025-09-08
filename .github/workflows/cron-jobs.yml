@@ -1,48 +1,136 @@
-name: Cron Jobs
+name: SwiftInvoice Cron Jobs
 
 on:
+  # Schedule the jobs to run automatically
   schedule:
-    # Run every day at 9:00 AM UTC for recurring invoices
+    # Recurring invoices - every day at 9:00 AM UTC
     - cron: '0 9 * * *'
-    # Run every day at 10:00 AM UTC for reminders
+    # Reminders - every day at 10:00 AM UTC  
     - cron: '0 10 * * *'
-  workflow_dispatch: # Allow manual triggering
+  
+  # Allow manual triggering from GitHub UI
+  workflow_dispatch:
+    inputs:
+      job_type:
+        description: 'Which cron job to run'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+        - both
+        - recurring
+        - reminders
 
 jobs:
   recurring-invoices:
-    if: github.event.schedule == '0 9 * * *' || github.event_name == 'workflow_dispatch'
+    name: Process Recurring Invoices
     runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'schedule' && github.event.schedule == '0 9 * * *' ||
+      github.event_name == 'workflow_dispatch' && (github.event.inputs.job_type == 'both' || github.event.inputs.job_type == 'recurring')
+    
     steps:
-      - name: Debug Environment
+      - name: Process Recurring Invoices
         run: |
-          echo "APP_URL: ${{ secrets.APP_URL }}"
-          echo "CRON_SECRET: ${{ secrets.CRON_SECRET }}"
-      - name: Trigger Recurring Invoices
-        run: |
-          if [ -z "${{ secrets.APP_URL }}" ]; then
-            echo "❌ APP_URL secret is not set!"
-            exit 1
-          fi
-          curl -X POST "${{ secrets.APP_URL }}/api/cron/recurring" \
+          echo "🔄 Processing recurring invoices..."
+          response=$(curl -s -X POST "${{ secrets.APP_URL }}/api/cron/recurring" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             -H "Content-Type: application/json" \
-            -v
+            -w "HTTPSTATUS:%{http_code}")
+          
+          http_code=$(echo $response | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+          body=$(echo $response | sed -e 's/HTTPSTATUS:.*//g')
+          
+          echo "Response: $body"
+          
+          if [ $http_code -eq 200 ]; then
+            echo "✅ Recurring invoices processed successfully"
+            echo "$body" | jq -r '.message // "No message"'
+            if echo "$body" | jq -e '.results[]' > /dev/null 2>&1; then
+              echo "Results:"
+              echo "$body" | jq -r '.results[] | "  - \(.status): \(.invoiceNumber // .error)"'
+            fi
+          else
+            echo "❌ Failed to process recurring invoices (HTTP $http_code)"
+            echo "$body" | jq -r '.error // "Unknown error"'
+            exit 1
+          fi
 
   reminders:
-    if: github.event.schedule == '0 10 * * *' || github.event_name == 'workflow_dispatch'
+    name: Send Invoice Reminders
     runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'schedule' && github.event.schedule == '0 10 * * *' ||
+      github.event_name == 'workflow_dispatch' && (github.event.inputs.job_type == 'both' || github.event.inputs.job_type == 'reminders')
+    
     steps:
-      - name: Debug Environment
+      - name: Send Invoice Reminders
         run: |
-          echo "APP_URL: ${{ secrets.APP_URL }}"
-          echo "CRON_SECRET: ${{ secrets.CRON_SECRET }}"
-      - name: Trigger Reminders
-        run: |
-          if [ -z "${{ secrets.APP_URL }}" ]; then
-            echo "❌ APP_URL secret is not set!"
-            exit 1
-          fi
-          curl -X POST "${{ secrets.APP_URL }}/api/cron/reminders" \
+          echo "📧 Sending invoice reminders..."
+          response=$(curl -s -X POST "${{ secrets.APP_URL }}/api/cron/reminders" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             -H "Content-Type: application/json" \
-            -v
+            -w "HTTPSTATUS:%{http_code}")
+          
+          http_code=$(echo $response | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+          body=$(echo $response | sed -e 's/HTTPSTATUS:.*//g')
+          
+          echo "Response: $body"
+          
+          if [ $http_code -eq 200 ]; then
+            echo "✅ Reminders sent successfully"
+            echo "$body" | jq -r '.message // "No message"'
+            if echo "$body" | jq -e '.results[]' > /dev/null 2>&1; then
+              echo "Results:"
+              echo "$body" | jq -r '.results[] | "  - \(.status): \(.invoiceNumber // .error)"'
+            fi
+          else
+            echo "❌ Failed to send reminders (HTTP $http_code)"
+            echo "$body" | jq -r '.error // "Unknown error"'
+            exit 1
+          fi
+
+  # Optional: Add a test job that can be run manually
+  test-cron:
+    name: Test Cron Jobs
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.job_type == 'both'
+    
+    steps:
+      - name: Test Recurring Invoices
+        run: |
+          echo "🧪 Testing recurring invoices..."
+          response=$(curl -s -X POST "${{ secrets.APP_URL }}/api/cron/recurring" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            -w "HTTPSTATUS:%{http_code}")
+          
+          http_code=$(echo $response | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+          body=$(echo $response | sed -e 's/HTTPSTATUS:.*//g')
+          
+          if [ $http_code -eq 200 ]; then
+            echo "✅ Recurring invoices test passed"
+            echo "$body" | jq -r '.message // "No message"'
+          else
+            echo "❌ Recurring invoices test failed (HTTP $http_code)"
+            echo "$body" | jq -r '.error // "Unknown error"'
+          fi
+      
+      - name: Test Reminders
+        run: |
+          echo "🧪 Testing reminders..."
+          response=$(curl -s -X POST "${{ secrets.APP_URL }}/api/cron/reminders" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            -w "HTTPSTATUS:%{http_code}")
+          
+          http_code=$(echo $response | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+          body=$(echo $response | sed -e 's/HTTPSTATUS:.*//g')
+          
+          if [ $http_code -eq 200 ]; then
+            echo "✅ Reminders test passed"
+            echo "$body" | jq -r '.message // "No message"'
+          else
+            echo "❌ Reminders test failed (HTTP $http_code)"
+            echo "$body" | jq -r '.error // "Unknown error"'
+          fi

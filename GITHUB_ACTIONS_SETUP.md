@@ -19,7 +19,16 @@ This guide will help you set up automatic cron jobs using GitHub Actions.
    git push origin main
    ```
 
-### **Step 2: Set Up GitHub Secrets**
+### **Step 2: Deploy Your App**
+
+Make sure your SwiftInvoice app is deployed and accessible. Popular platforms:
+
+- **Vercel**: `https://your-app.vercel.app`
+- **Netlify**: `https://your-app.netlify.app`
+- **Railway**: `https://your-app.railway.app`
+- **Custom Domain**: `https://yourdomain.com`
+
+### **Step 3: Set Up GitHub Secrets**
 
 1. Go to your GitHub repository
 2. Click on **Settings** tab
@@ -30,25 +39,48 @@ This guide will help you set up automatic cron jobs using GitHub Actions.
 
 **Secret 1: APP_URL**
 - **Name**: `APP_URL`
-- **Value**: Your app URL (e.g., `https://your-app.vercel.app` or `https://your-domain.com`)
+- **Value**: Your deployed app URL (e.g., `https://your-app.vercel.app` or `https://your-domain.com`)
+- **Important**: This must be your production URL, not localhost
 
 **Secret 2: CRON_SECRET**
 - **Name**: `CRON_SECRET`
 - **Value**: Your cron secret (same as in your .env file, e.g., `my-test-cron-secret-123`)
+- **Generate**: Use `openssl rand -base64 32` to create a secure secret
 
-### **Step 3: Verify the Workflow**
+#### **Important: Set Environment Variables in Your Deployment**
+
+Make sure these environment variables are set in your deployment platform:
+
+**For Vercel:**
+1. Go to your project dashboard
+2. Click **Settings** → **Environment Variables**
+3. Add: `CRON_SECRET` and `APP_URL`
+
+**For Netlify:**
+1. Go to **Site settings** → **Environment variables**
+2. Add: `CRON_SECRET` and `APP_URL`
+
+**For Railway:**
+1. Go to your project → **Variables**
+2. Add: `CRON_SECRET` and `APP_URL`
+
+### **Step 4: Verify the Workflow**
 
 1. Go to the **Actions** tab in your GitHub repository
 2. You should see "Cron Jobs" workflow
 3. Click on it to see the details
 
-### **Step 4: Test the Setup**
+### **Step 5: Test the Setup**
 
 #### **Option A: Manual Test (Recommended)**
 1. Go to **Actions** → **Cron Jobs**
 2. Click **Run workflow** button
-3. Select your branch and click **Run workflow**
-4. Watch the logs to see if it works
+3. Select your branch and choose job type:
+   - **both**: Run both recurring invoices and reminders
+   - **recurring**: Run only recurring invoices
+   - **reminders**: Run only reminders
+4. Click **Run workflow**
+5. Watch the logs to see if it works
 
 #### **Option B: Wait for Automatic Run**
 - The jobs will run automatically at 9:00 AM and 10:00 AM UTC daily
