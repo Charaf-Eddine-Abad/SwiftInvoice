@@ -1,12 +1,12 @@
 name: SwiftInvoice Cron Jobs
 
 on:
-  # Schedule the jobs to run automatically
-  schedule:
-    # Recurring invoices - every day at 9:00 AM UTC
-    - cron: '0 9 * * *'
-    # Reminders - every day at 10:00 AM UTC  
-    - cron: '0 10 * * *'
+  # Schedule the jobs to run automatically - DISABLED TO STOP ERROR EMAILS
+  # schedule:
+  #   # Recurring invoices - every day at 9:00 AM UTC
+  #   - cron: '0 9 * * *'
+  #   # Reminders - every day at 10:00 AM UTC  
+  #   - cron: '0 10 * * *'
   
   # Allow manual triggering from GitHub UI
   workflow_dispatch:
@@ -26,7 +26,6 @@ jobs:
     name: Process Recurring Invoices
     runs-on: ubuntu-latest
     if: |
-      github.event_name == 'schedule' && github.event.schedule == '0 9 * * *' ||
       github.event_name == 'workflow_dispatch' && (github.event.inputs.job_type == 'both' || github.event.inputs.job_type == 'recurring')
     
     steps:
@@ -60,7 +59,6 @@ jobs:
     name: Send Invoice Reminders
     runs-on: ubuntu-latest
     if: |
-      github.event_name == 'schedule' && github.event.schedule == '0 10 * * *' ||
       github.event_name == 'workflow_dispatch' && (github.event.inputs.job_type == 'both' || github.event.inputs.job_type == 'reminders')
     
     steps:
