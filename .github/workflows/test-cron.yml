@@ -13,6 +13,7 @@ on:
         - simple
         - health-check
         - api-test
+        - simple-cron
 
 jobs:
   simple-test:
@@ -111,3 +112,40 @@ jobs:
           fi
           
           echo "📅 API test completed at: $(date)"
+
+  simple-cron:
+    name: Simple Cron Test
+    runs-on: ubuntu-latest
+    if: github.event.inputs.test_type == 'simple-cron'
+    
+    steps:
+      - name: Simple Cron Test
+        run: |
+          echo "🧪 Testing simple cron endpoint..."
+          
+          if [ -n "${{ secrets.APP_URL }}" ] && [ -n "${{ secrets.CRON_SECRET }}" ]; then
+            echo "🔗 Testing simple cron at: ${{ secrets.APP_URL }}"
+            
+            # Test simple cron endpoint
+            echo "📡 Testing simple cron endpoint..."
+            response=$(curl -s -X POST "${{ secrets.APP_URL }}/api/cron/simple-test" \
+              -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+              -H "Content-Type: application/json" \
+              -w "HTTPSTATUS:%{http_code}" || echo "HTTPSTATUS:000")
+            
+            http_code=$(echo $response | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+            body=$(echo $response | sed -e 's/HTTPSTATUS:.*//g')
+            
+            echo "Simple Cron Response: $body"
+            echo "Simple Cron HTTP Code: $http_code"
+            
+            if [ $http_code -eq 200 ]; then
+              echo "✅ Simple cron test passed"
+            else
+              echo "⚠️ Simple cron test returned HTTP $http_code"
+            fi
+          else
+            echo "⚠️ Required secrets not set (APP_URL or CRON_SECRET)"
+          fi
+          
+          echo "📅 Simple cron test completed at: $(date)"
