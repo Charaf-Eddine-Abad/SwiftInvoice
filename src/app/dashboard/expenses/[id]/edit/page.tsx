@@ -396,7 +396,8 @@ export default function EditExpensePage() {
                 )}
               </div>
             </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {/* Submit Button */}
           <div className="flex justify-end space-x-3">
