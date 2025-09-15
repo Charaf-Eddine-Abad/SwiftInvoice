@@ -7,11 +7,20 @@ import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { userRegistrationSchema, UserRegistrationInput } from '@/lib/validations'
+import PasswordInput from '@/components/PasswordInput'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 export default function SignUpPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: ''
+  })
   const { data: session } = useSession()
   const router = useRouter()
 
@@ -32,16 +41,17 @@ export default function SignUpPage() {
 
   if (session) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Redirecting...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Redirecting...</p>
         </div>
       </div>
     )
   }
 
-  const onSubmit = async (data: UserRegistrationInput) => {
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
     try {
       setIsLoading(true)
       setError('')
@@ -52,7 +62,7 @@ export default function SignUpPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(formData),
       })
 
       const result = await response.json()
@@ -63,7 +73,7 @@ export default function SignUpPage() {
         setSuccess('Account created successfully! Please check your email for verification code.')
         // Redirect to email verification
         setTimeout(() => {
-          router.push(`/auth/verify-email?email=${encodeURIComponent(data.email)}`)
+          router.push(`/auth/verify-email?email=${encodeURIComponent(formData.email)}`)
         }, 2000)
       }
     } catch (error) {
@@ -74,131 +84,122 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="bg-white shadow-sm">
+      <nav className="bg-card shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <Link href="/" className="text-xl font-bold text-blue-600">
+              <Link href="/" className="text-xl font-bold text-primary">
                 SwiftInvoice
               </Link>
             </div>
             <div className="flex items-center space-x-4">
-              <Link
-                href="/"
-                className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Home
-              </Link>
-              <Link
-                href="/auth/signin"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-              >
-                Sign In
-              </Link>
+              <Button variant="ghost" asChild>
+                <Link href="/">
+                  Home
+                </Link>
+              </Button>
+              <Button asChild>
+                <Link href="/auth/signin">
+                  Sign In
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
       </nav>
 
       <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create your SwiftInvoice account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
-            <Link
-              href="/auth/signin"
-              className="font-medium text-blue-600 hover:text-blue-500"
-            >
-              sign in to your existing account
-            </Link>
-          </p>
-        </div>
-        
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-          {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <div className="text-sm text-red-700">{error}</div>
-            </div>
-          )}
-          
-          {success && (
-            <div className="rounded-md bg-green-50 p-4">
-              <div className="text-sm text-green-700">{success}</div>
-            </div>
-          )}
-          
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Full Name
-              </label>
-              <input
-                id="name"
-                type="text"
-                autoComplete="name"
-                required
-                {...register('name')}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="Enter your full name"
-              />
-              {errors.name && (
-                <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+        <Card className="max-w-md w-full">
+          <CardHeader>
+            <CardTitle className="text-center text-3xl font-extrabold">
+              Create your SwiftInvoice account
+            </CardTitle>
+            <p className="text-center text-sm text-muted-foreground">
+              Or{' '}
+              <Link
+                href="/auth/signin"
+                className="font-medium text-primary hover:text-primary/80"
+              >
+                sign in to your existing account
+              </Link>
+            </p>
+          </CardHeader>
+          <CardContent>
+            <form className="space-y-6" onSubmit={onSubmit}>
+              {error && (
+                <Card className="border-destructive/20 bg-destructive/5">
+                  <CardContent className="p-4">
+                    <div className="text-sm text-destructive">{error}</div>
+                  </CardContent>
+                </Card>
               )}
-            </div>
-            
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
-              </label>
-              <input
-                id="email"
-                type="email"
-                autoComplete="email"
-                required
-                {...register('email')}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="Enter your email address"
-              />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+              
+              {success && (
+                <Card className="border-green-500/20 bg-green-500/5">
+                  <CardContent className="p-4">
+                    <div className="text-sm text-green-700">{success}</div>
+                  </CardContent>
+                </Card>
               )}
-            </div>
-            
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
+              
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-foreground">
+                    Full Name
+                  </label>
+                  <Input
+                    id="name"
+                    type="text"
+                    autoComplete="name"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="mt-1"
+                    placeholder="Enter your full name"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-foreground">
+                    Email address
+                  </label>
+                  <Input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="mt-1"
+                    placeholder="Enter your email address"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-foreground">
+                    Password
               </label>
-              <input
-                id="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                {...register('password')}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="Create a password (min 8 characters)"
-              />
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
-              )}
-            </div>
-          </div>
+                  <PasswordInput
+                    value={formData.password}
+                    onChange={(value) => setFormData({ ...formData, password: value })}
+                    placeholder="Create a password (min 8 characters)"
+                    className="mt-1"
+                  />
+                </div>
+              </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-            >
-              {isLoading ? 'Creating account...' : 'Create account'}
-            </button>
-          </div>
-        </form>
-        </div>
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full"
+              >
+                {isLoading ? 'Creating account...' : 'Create account'}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

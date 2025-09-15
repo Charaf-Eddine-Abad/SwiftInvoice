@@ -7,6 +7,8 @@ import Navigation from '@/components/Navigation'
 import ClientForm from '@/components/ClientForm'
 import { ClientInput } from '@/lib/validations'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 
 export default function NewClientPage() {
   const { data: session, status } = useSession()
@@ -14,11 +16,11 @@ export default function NewClientPage() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Loading...</p>
           </div>
         </div>
       </div>
@@ -57,30 +59,29 @@ export default function NewClientPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Navigation />
       
       <div className="max-w-3xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="mb-8">
-            <Link
-              href="/clients"
-              className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 mb-4"
-            >
-              <ArrowLeftIcon className="h-4 w-4 mr-2" />
-              Back to Clients
-            </Link>
-            <h1 className="text-3xl font-bold text-gray-900">Add New Client</h1>
+            <Button variant="ghost" asChild className="mb-4">
+              <Link href="/clients">
+                <ArrowLeftIcon className="h-4 w-4 mr-2" />
+                Back to Clients
+              </Link>
+            </Button>
+            <h1 className="text-3xl font-bold text-foreground">Add New Client</h1>
           </div>
 
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
+          <Card>
+            <CardContent className="p-6">
               <ClientForm
                 onSubmit={handleSubmit}
                 onCancel={handleCancel}
               />
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

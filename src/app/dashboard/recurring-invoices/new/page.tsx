@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 interface Client {
   id: string
@@ -110,21 +113,20 @@ export default function NewRecurringInvoicePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white shadow">
+      <div className="bg-background border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Create Recurring Invoice</h1>
-              <p className="mt-2 text-gray-600">Set up automated invoice generation</p>
+              <h1 className="text-3xl font-bold text-foreground">Create Recurring Invoice</h1>
+              <p className="mt-2 text-muted-foreground">Set up automated invoice generation</p>
             </div>
-            <Link
-              href="/dashboard/recurring-invoices"
-              className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm font-medium transition-colors"
-            >
-              Back to Recurring Invoices
-            </Link>
+            <Button variant="outline" asChild>
+              <Link href="/dashboard/recurring-invoices">
+                Back to Recurring Invoices
+              </Link>
+            </Button>
           </div>
         </div>
       </div>
@@ -132,33 +134,38 @@ export default function NewRecurringInvoicePage() {
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
-            <div className="text-sm text-red-700">{error}</div>
-          </div>
+          <Card className="mb-6 border-destructive/20 bg-destructive/5">
+            <CardContent className="p-4">
+              <div className="text-sm text-destructive">{error}</div>
+            </CardContent>
+          </Card>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Basic Information */}
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Basic Information</h2>
+          <Card>
+            <CardHeader>
+              <CardTitle>Basic Information</CardTitle>
+            </CardHeader>
+            <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="name" className="block text-sm font-medium text-foreground">
                   Name *
                 </label>
-                <input
+                <Input
                   type="text"
                   id="name"
                   required
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="mt-1"
                   placeholder="e.g., Monthly Retainer"
                 />
               </div>
 
               <div>
-                <label htmlFor="clientId" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="clientId" className="block text-sm font-medium text-foreground">
                   Client *
                 </label>
                 <select
@@ -166,7 +173,7 @@ export default function NewRecurringInvoicePage() {
                   required
                   value={formData.clientId}
                   onChange={(e) => setFormData(prev => ({ ...prev, clientId: e.target.value }))}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="mt-1 block w-full border-input rounded-md shadow-sm focus:ring-ring focus:border-ring bg-background"
                 >
                   <option value="">Select a client</option>
                   {clients.map((client) => (
@@ -178,7 +185,7 @@ export default function NewRecurringInvoicePage() {
               </div>
 
               <div className="md:col-span-2">
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="description" className="block text-sm font-medium text-foreground">
                   Description
                 </label>
                 <textarea
@@ -186,19 +193,23 @@ export default function NewRecurringInvoicePage() {
                   rows={3}
                   value={formData.description}
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="mt-1 block w-full border-input rounded-md shadow-sm focus:ring-ring focus:border-ring bg-background text-foreground"
                   placeholder="Optional description for this recurring invoice"
                 />
               </div>
             </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {/* Schedule */}
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Schedule</h2>
+          <Card>
+            <CardHeader>
+              <CardTitle>Schedule</CardTitle>
+            </CardHeader>
+            <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label htmlFor="frequency" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="frequency" className="block text-sm font-medium text-foreground">
                   Frequency *
                 </label>
                 <select
@@ -206,7 +217,7 @@ export default function NewRecurringInvoicePage() {
                   required
                   value={formData.frequency}
                   onChange={(e) => setFormData(prev => ({ ...prev, frequency: e.target.value as 'WEEKLY' | 'MONTHLY' }))}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="mt-1 block w-full border-input rounded-md shadow-sm focus:ring-ring focus:border-ring bg-background"
                 >
                   <option value="WEEKLY">Weekly</option>
                   <option value="MONTHLY">Monthly</option>
@@ -214,182 +225,195 @@ export default function NewRecurringInvoicePage() {
               </div>
 
               <div>
-                <label htmlFor="interval" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="interval" className="block text-sm font-medium text-foreground">
                   Interval *
                 </label>
-                  <input
+                  <Input
                     type="number"
                     id="interval"
                     required
                     min="1"
                     value={formData.interval || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, interval: parseInt(e.target.value) || 1 }))}
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    className="mt-1"
                   />
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-muted-foreground">
                   Every {formData.interval} {formData.frequency.toLowerCase()}
                 </p>
               </div>
 
               <div>
-                <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="startDate" className="block text-sm font-medium text-foreground">
                   Start Date *
                 </label>
-                <input
+                <Input
                   type="date"
                   id="startDate"
                   required
                   value={formData.startDate}
                   onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="mt-1"
                 />
               </div>
             </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {/* Line Items */}
-          <div className="bg-white shadow rounded-lg p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-medium text-gray-900">Line Items</h2>
-              <button
-                type="button"
-                onClick={addLineItem}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Add Item
-              </button>
-            </div>
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <CardTitle>Line Items</CardTitle>
+                <Button
+                  type="button"
+                  onClick={addLineItem}
+                  size="sm"
+                >
+                  Add Item
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
 
             <div className="space-y-4">
               {formData.lineItems.map((item, index) => (
-                <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border border-gray-200 rounded-lg">
+                <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border border-border rounded-lg">
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700">Description</label>
-                    <input
+                    <label className="block text-sm font-medium text-foreground">Description</label>
+                    <Input
                       type="text"
                       required
                       value={item.description}
                       onChange={(e) => updateLineItem(index, 'description', e.target.value)}
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      className="mt-1"
                       placeholder="Item description"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Quantity</label>
-                      <input
+                    <label className="block text-sm font-medium text-foreground">Quantity</label>
+                      <Input
                         type="number"
                         required
                         min="0"
                         step="0.01"
                         value={item.quantity || ''}
                         onChange={(e) => updateLineItem(index, 'quantity', parseFloat(e.target.value) || 0)}
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        className="mt-1"
                       />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Unit Price</label>
+                    <label className="block text-sm font-medium text-foreground">Unit Price</label>
                     <div className="flex">
-                      <input
+                      <Input
                         type="number"
                         required
                         min="0"
                         step="0.01"
                         value={item.unitPrice || ''}
                         onChange={(e) => updateLineItem(index, 'unitPrice', parseFloat(e.target.value) || 0)}
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        className="mt-1"
                       />
                       {formData.lineItems.length > 1 && (
-                        <button
+                        <Button
                           type="button"
+                          variant="ghost"
+                          size="sm"
                           onClick={() => removeLineItem(index)}
-                          className="ml-2 mt-1 text-red-600 hover:text-red-900"
+                          className="ml-2 mt-1 text-destructive hover:text-destructive/80 p-1 h-8 w-8"
                         >
                           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {/* Tax and Discount */}
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Tax & Discount</h2>
+          <Card>
+            <CardHeader>
+              <CardTitle>Tax & Discount</CardTitle>
+            </CardHeader>
+            <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="tax" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="tax" className="block text-sm font-medium text-foreground">
                   Tax (%)
                 </label>
-                  <input
+                  <Input
                     type="number"
                     id="tax"
                     min="0"
                     step="0.01"
                     value={formData.tax || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, tax: parseFloat(e.target.value) || 0 }))}
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    className="mt-1"
                   />
               </div>
 
               <div>
-                <label htmlFor="discount" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="discount" className="block text-sm font-medium text-foreground">
                   Discount ($)
                 </label>
-                  <input
+                  <Input
                     type="number"
                     id="discount"
                     min="0"
                     step="0.01"
                     value={formData.discount || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, discount: parseFloat(e.target.value) || 0 }))}
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    className="mt-1"
                   />
               </div>
             </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {/* Summary */}
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Summary</h2>
+          <Card>
+            <CardHeader>
+              <CardTitle>Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Subtotal:</span>
-                <span className="text-gray-900">${calculateSubtotal().toFixed(2)}</span>
+                <span className="text-muted-foreground">Subtotal:</span>
+                <span className="text-foreground">${calculateSubtotal().toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Tax ({formData.tax}%):</span>
-                <span className="text-gray-900">${((calculateSubtotal() * formData.tax) / 100).toFixed(2)}</span>
+                <span className="text-muted-foreground">Tax ({formData.tax}%):</span>
+                <span className="text-foreground">${((calculateSubtotal() * formData.tax) / 100).toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Discount:</span>
-                <span className="text-gray-900">-${formData.discount.toFixed(2)}</span>
+                <span className="text-muted-foreground">Discount:</span>
+                <span className="text-foreground">-${formData.discount.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-lg font-semibold border-t pt-2">
-                <span className="text-gray-900">Total:</span>
-                <span className="text-gray-900">${calculateTotal().toFixed(2)}</span>
+              <div className="flex justify-between text-lg font-semibold border-t border-border pt-2">
+                <span className="text-foreground">Total:</span>
+                <span className="text-foreground">${calculateTotal().toFixed(2)}</span>
               </div>
             </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {/* Submit Button */}
           <div className="flex justify-end space-x-3">
-            <Link
-              href="/dashboard/recurring-invoices"
-              className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-md text-sm font-medium transition-colors"
-            >
-              Cancel
-            </Link>
-            <button
+            <Button variant="outline" asChild>
+              <Link href="/dashboard/recurring-invoices">
+                Cancel
+              </Link>
+            </Button>
+            <Button
               type="submit"
               disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50"
             >
               {loading ? 'Creating...' : 'Create Recurring Invoice'}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

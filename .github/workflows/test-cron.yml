@@ -1,0 +1,113 @@
+name: Test Cron Job
+
+on:
+  # Allow manual triggering from GitHub UI
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Type of test to run'
+        required: true
+        default: 'simple'
+        type: choice
+        options:
+        - simple
+        - health-check
+        - api-test
+
+jobs:
+  simple-test:
+    name: Simple Test
+    runs-on: ubuntu-latest
+    if: github.event.inputs.test_type == 'simple'
+    
+    steps:
+      - name: Simple Test
+        run: |
+          echo "🧪 Running simple test..."
+          echo "✅ Test completed successfully!"
+          echo "📅 Current time: $(date)"
+          echo "🌍 Timezone: $(date +%Z)"
+          echo "📊 Random number: $((RANDOM % 100))"
+          echo "🎯 Test result: SUCCESS"
+
+  health-check:
+    name: Health Check
+    runs-on: ubuntu-latest
+    if: github.event.inputs.test_type == 'health-check'
+    
+    steps:
+      - name: Health Check
+        run: |
+          echo "🏥 Running health check..."
+          
+          # Test if we can reach the app
+          if [ -n "${{ secrets.APP_URL }}" ]; then
+            echo "🔗 Testing connection to: ${{ secrets.APP_URL }}"
+            
+            response=$(curl -s -o /dev/null -w "%{http_code}" "${{ secrets.APP_URL }}" || echo "000")
+            
+            if [ "$response" = "200" ]; then
+              echo "✅ App is responding (HTTP 200)"
+            else
+              echo "⚠️ App responded with HTTP $response"
+            fi
+          else
+            echo "⚠️ APP_URL secret not set"
+          fi
+          
+          echo "📅 Health check completed at: $(date)"
+
+  api-test:
+    name: API Test
+    runs-on: ubuntu-latest
+    if: github.event.inputs.test_type == 'api-test'
+    
+    steps:
+      - name: API Test
+        run: |
+          echo "🔌 Testing API endpoints..."
+          
+          if [ -n "${{ secrets.APP_URL }}" ] && [ -n "${{ secrets.CRON_SECRET }}" ]; then
+            echo "🔗 Testing API at: ${{ secrets.APP_URL }}"
+            
+            # Test health endpoint
+            echo "📡 Testing health endpoint..."
+            response=$(curl -s -X GET "${{ secrets.APP_URL }}/api/health" \
+              -w "HTTPSTATUS:%{http_code}" || echo "HTTPSTATUS:000")
+            
+            http_code=$(echo $response | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+            body=$(echo $response | sed -e 's/HTTPSTATUS:.*//g')
+            
+            echo "Health Response: $body"
+            echo "Health HTTP Code: $http_code"
+            
+            if [ $http_code -eq 200 ]; then
+              echo "✅ Health check passed"
+            else
+              echo "⚠️ Health check returned HTTP $http_code"
+            fi
+            
+            # Test cron test endpoint
+            echo "📡 Testing cron test endpoint..."
+            response=$(curl -s -X POST "${{ secrets.APP_URL }}/api/cron/test" \
+              -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+              -H "Content-Type: application/json" \
+              -d '{"test": "cron job test", "timestamp": "'$(date -Iseconds)'"}' \
+              -w "HTTPSTATUS:%{http_code}" || echo "HTTPSTATUS:000")
+            
+            http_code=$(echo $response | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+            body=$(echo $response | sed -e 's/HTTPSTATUS:.*//g')
+            
+            echo "Cron Test Response: $body"
+            echo "Cron Test HTTP Code: $http_code"
+            
+            if [ $http_code -eq 200 ]; then
+              echo "✅ Cron test passed"
+            else
+              echo "⚠️ Cron test returned HTTP $http_code"
+            fi
+          else
+            echo "⚠️ Required secrets not set (APP_URL or CRON_SECRET)"
+          fi
+          
+          echo "📅 API test completed at: $(date)"

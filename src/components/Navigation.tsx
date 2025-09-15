@@ -11,32 +11,38 @@ import {
   ClockIcon,
   CurrencyDollarIcon,
   BellIcon,
-  CreditCardIcon
+  CreditCardIcon,
+  Cog6ToothIcon
 } from '@heroicons/react/24/outline'
+import ThemeToggle from './ThemeToggle'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { Button } from '@/components/ui/button'
 
 export default function Navigation() {
   const pathname = usePathname()
   const { data: session } = useSession()
+  const { t } = useLanguage()
 
   const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-    { name: 'Clients', href: '/clients', icon: UsersIcon },
-    { name: 'Invoices', href: '/invoices', icon: DocumentTextIcon },
-    { name: 'Recurring', href: '/dashboard/recurring-invoices', icon: ClockIcon },
-    { name: 'Expenses', href: '/dashboard/expenses', icon: CurrencyDollarIcon },
-    { name: 'Reminders', href: '/dashboard/reminders', icon: BellIcon },
-    { name: 'Payments', href: '/dashboard/payments', icon: CreditCardIcon },
+    { name: t('nav.dashboard'), href: '/dashboard', icon: HomeIcon },
+    { name: t('nav.clients'), href: '/clients', icon: UsersIcon },
+    { name: t('nav.invoices'), href: '/invoices', icon: DocumentTextIcon },
+    { name: t('nav.recurring'), href: '/dashboard/recurring-invoices', icon: ClockIcon },
+    { name: t('nav.expenses'), href: '/dashboard/expenses', icon: CurrencyDollarIcon },
+    { name: t('nav.reminders'), href: '/dashboard/reminders', icon: BellIcon },
+    { name: t('nav.payments'), href: '/dashboard/payments', icon: CreditCardIcon },
+    { name: t('nav.settings'), href: '/settings', icon: Cog6ToothIcon },
   ]
 
   if (!session) return null
 
   return (
-    <nav className="bg-white shadow-sm border-b">
+    <nav className="bg-background shadow-sm border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <Link href="/dashboard" className="text-xl font-bold text-blue-600">
+              <Link href="/dashboard" className="text-xl font-bold text-primary">
                 SwiftInvoice
               </Link>
             </div>
@@ -49,8 +55,8 @@ export default function Navigation() {
                     href={item.href}
                     className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
                       isActive
-                        ? 'border-blue-500 text-gray-900'
-                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                        ? 'border-primary text-foreground'
+                        : 'border-transparent text-muted-foreground hover:border-border hover:text-foreground'
                     }`}
                   >
                     <item.icon className="w-4 h-4 mr-2" />
@@ -62,16 +68,19 @@ export default function Navigation() {
           </div>
           
           <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-700">
-              Welcome, {session.user?.name}
+            <ThemeToggle />
+            <span className="text-sm text-muted-foreground">
+              {t('nav.welcome')}, {session.user?.name}
             </span>
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => signOut()}
-              className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="text-muted-foreground hover:text-foreground"
             >
               <ArrowRightOnRectangleIcon className="w-4 h-4 mr-2" />
-              Sign out
-            </button>
+              {t('nav.signout')}
+            </Button>
           </div>
         </div>
       </div>

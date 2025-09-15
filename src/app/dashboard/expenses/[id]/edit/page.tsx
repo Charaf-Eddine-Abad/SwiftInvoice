@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 const EXPENSE_CATEGORIES = [
   'OFFICE_SUPPLIES',
@@ -150,31 +153,30 @@ export default function EditExpensePage() {
 
   if (!expense) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading expense...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading expense...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white shadow">
+      <div className="bg-background border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Edit Expense</h1>
-              <p className="mt-2 text-gray-600">Update expense details</p>
+              <h1 className="text-3xl font-bold text-foreground">Edit Expense</h1>
+              <p className="mt-2 text-muted-foreground">Update expense details</p>
             </div>
-            <Link
-              href="/dashboard/expenses"
-              className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm font-medium transition-colors"
-            >
-              Back to Expenses
-            </Link>
+            <Button variant="outline" asChild>
+              <Link href="/dashboard/expenses">
+                Back to Expenses
+              </Link>
+            </Button>
           </div>
         </div>
       </div>
@@ -182,39 +184,44 @@ export default function EditExpensePage() {
       {/* Main Content */}
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
-            <div className="text-sm text-red-700">{error}</div>
-          </div>
+          <Card className="mb-6 border-destructive/20 bg-destructive/5">
+            <CardContent className="p-4">
+              <div className="text-sm text-destructive">{error}</div>
+            </CardContent>
+          </Card>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Expense Details</h2>
+          <Card>
+            <CardHeader>
+              <CardTitle>Expense Details</CardTitle>
+            </CardHeader>
+            <CardContent>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="date" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="date" className="block text-sm font-medium text-foreground">
                   Date *
                 </label>
-                <input
+                <Input
                   type="date"
                   id="date"
                   required
                   value={formData.date}
                   onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="mt-1"
                 />
               </div>
 
               <div>
-                <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="amount" className="block text-sm font-medium text-foreground">
                   Amount *
                 </label>
-                <div className="mt-1 relative rounded-md shadow-sm">
+                <div className="mt-1 relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-gray-500 sm:text-sm">$</span>
+                    <span className="text-muted-foreground sm:text-sm">$</span>
                   </div>
-                  <input
+                  <Input
                     type="number"
                     id="amount"
                     required
@@ -222,21 +229,21 @@ export default function EditExpensePage() {
                     step="0.01"
                     value={formData.amount}
                     onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
-                    className="pl-7 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    className="pl-7"
                     placeholder="0.00"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="currency" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="currency" className="block text-sm font-medium text-foreground">
                   Currency
                 </label>
                 <select
                   id="currency"
                   value={formData.currency}
                   onChange={(e) => setFormData(prev => ({ ...prev, currency: e.target.value }))}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="mt-1 block w-full border-input rounded-md shadow-sm focus:ring-ring focus:border-ring bg-background"
                 >
                   <option value="USD">USD</option>
                   <option value="EUR">EUR</option>
@@ -246,7 +253,7 @@ export default function EditExpensePage() {
               </div>
 
               <div>
-                <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="category" className="block text-sm font-medium text-foreground">
                   Category *
                 </label>
                 <select
@@ -254,7 +261,7 @@ export default function EditExpensePage() {
                   required
                   value={formData.category}
                   onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="mt-1 block w-full border-input rounded-md shadow-sm focus:ring-ring focus:border-ring bg-background"
                 >
                   {EXPENSE_CATEGORIES.map(category => (
                     <option key={category} value={category}>
@@ -265,22 +272,22 @@ export default function EditExpensePage() {
               </div>
 
               <div className="md:col-span-2">
-                <label htmlFor="vendor" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="vendor" className="block text-sm font-medium text-foreground">
                   Vendor *
                 </label>
-                <input
+                <Input
                   type="text"
                   id="vendor"
                   required
                   value={formData.vendor}
                   onChange={(e) => setFormData(prev => ({ ...prev, vendor: e.target.value }))}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="mt-1"
                   placeholder="e.g., Amazon, Office Depot, etc."
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="description" className="block text-sm font-medium text-foreground">
                   Description *
                 </label>
                 <textarea
@@ -289,13 +296,13 @@ export default function EditExpensePage() {
                   rows={3}
                   value={formData.description}
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="mt-1 block w-full border-input rounded-md shadow-sm focus:ring-ring focus:border-ring bg-background text-foreground"
                   placeholder="Describe what this expense was for..."
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Receipt (Optional)
                 </label>
                 
@@ -308,9 +315,9 @@ export default function EditExpensePage() {
                       value="url"
                       checked={receiptType === 'url'}
                       onChange={(e) => setReceiptType(e.target.value as 'url' | 'file')}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      className="h-4 w-4 text-primary focus:ring-ring border-input"
                     />
-                    <span className="ml-2 text-sm text-gray-700">URL Link</span>
+                    <span className="ml-2 text-sm text-foreground">URL Link</span>
                   </label>
                   <label className="flex items-center">
                     <input
@@ -319,22 +326,22 @@ export default function EditExpensePage() {
                       value="file"
                       checked={receiptType === 'file'}
                       onChange={(e) => setReceiptType(e.target.value as 'url' | 'file')}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      className="h-4 w-4 text-primary focus:ring-ring border-input"
                     />
-                    <span className="ml-2 text-sm text-gray-700">Upload File</span>
+                    <span className="ml-2 text-sm text-foreground">Upload File</span>
                   </label>
                 </div>
 
                 {/* Current Receipt Display */}
                 {expense.receiptUrl && (
-                  <div className="mb-4 p-3 bg-gray-50 rounded-md">
-                    <p className="text-sm text-gray-600 mb-2">Current receipt:</p>
+                  <div className="mb-4 p-3 bg-muted rounded-md">
+                    <p className="text-sm text-muted-foreground mb-2">Current receipt:</p>
                     {expense.receiptUrl.startsWith('/uploads/') ? (
                       <a
                         href={expense.receiptUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 text-sm"
+                        className="text-primary hover:text-primary/80 text-sm"
                       >
                         📄 View current file
                       </a>
@@ -343,7 +350,7 @@ export default function EditExpensePage() {
                         href={expense.receiptUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 text-sm"
+                        className="text-primary hover:text-primary/80 text-sm"
                       >
                         🔗 {expense.receiptUrl}
                       </a>
@@ -354,15 +361,14 @@ export default function EditExpensePage() {
                 {/* URL Input */}
                 {receiptType === 'url' && (
                   <div>
-                    <input
+                    <Input
                       type="url"
                       id="receiptUrl"
                       value={formData.receiptUrl}
                       onChange={(e) => setFormData(prev => ({ ...prev, receiptUrl: e.target.value }))}
-                      className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                       placeholder="https://example.com/receipt.pdf"
                     />
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       Link to a digital receipt or document
                     </p>
                   </div>
@@ -376,9 +382,9 @@ export default function EditExpensePage() {
                       id="receiptFile"
                       accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
                       onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
-                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                      className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-muted file:text-foreground hover:file:bg-muted/80"
                     />
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       Upload a receipt file (PDF, JPG, PNG, DOC, DOCX)
                     </p>
                     {receiptFile && (
@@ -394,19 +400,17 @@ export default function EditExpensePage() {
 
           {/* Submit Button */}
           <div className="flex justify-end space-x-3">
-            <Link
-              href="/dashboard/expenses"
-              className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-md text-sm font-medium transition-colors"
-            >
-              Cancel
-            </Link>
-            <button
+            <Button variant="outline" asChild>
+              <Link href="/dashboard/expenses">
+                Cancel
+              </Link>
+            </Button>
+            <Button
               type="submit"
               disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50"
             >
               {loading ? 'Updating...' : 'Update Expense'}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

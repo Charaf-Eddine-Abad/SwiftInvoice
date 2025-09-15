@@ -18,6 +18,8 @@ model User {
   password          String
   emailVerified     Boolean   @default(false) @map("email_verified")
   emailVerifiedAt   DateTime? @map("email_verified_at")
+  defaultTaxRate    Float     @default(10) @map("default_tax_rate")
+  defaultDiscount   Float     @default(0) @map("default_discount")
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
 
@@ -31,6 +33,8 @@ model User {
   recurringInvoices RecurringInvoice[]
   reminderPolicies  ReminderPolicy[]
   expenses          Expense[]
+  organization      Organization?
+  invoiceCustomization InvoiceCustomization?
 
   @@map("users")
 }
@@ -276,4 +280,53 @@ enum ExpenseCategory {
   RENT
   EQUIPMENT
   OTHER
+}
+
+// Organization model for storing company/business details
+model Organization {
+  id          String   @id @default(cuid())
+  userId      String   @unique @map("user_id")
+  name        String
+  industry    String?
+  address     String?
+  city        String?
+  state       String?
+  zipCode     String?  @map("zip_code")
+  country     String?  @default("US")
+  phone       String?
+  email       String?
+  website     String?
+  taxId       String?  @map("tax_id")
+  currency    String   @default("USD")
+  timezone    String   @default("UTC")
+  language    String   @default("en")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("organizations")
+}
+
+// Invoice Customization model for branding and design
+model InvoiceCustomization {
+  id              String   @id @default(cuid())
+  userId          String   @unique @map("user_id")
+  logoUrl         String?  @map("logo_url")
+  primaryColor    String   @default("#2563eb") @map("primary_color")
+  secondaryColor  String   @default("#1e40af") @map("secondary_color")
+  accentColor     String   @default("#3b82f6") @map("accent_color")
+  fontFamily      String   @default("Inter") @map("font_family")
+  templateStyle   String   @default("modern") @map("template_style")
+  showLogo        Boolean  @default(true) @map("show_logo")
+  showCompanyInfo Boolean  @default(true) @map("show_company_info")
+  footerText      String?  @map("footer_text")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("invoice_customizations")
 }

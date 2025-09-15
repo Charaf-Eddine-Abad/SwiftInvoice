@@ -7,10 +7,18 @@ import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { userLoginSchema, UserLoginInput } from '@/lib/validations'
+import PasswordInput from '@/components/PasswordInput'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 export default function SignInPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  })
   const { data: session } = useSession()
   const router = useRouter()
 
@@ -31,23 +39,24 @@ export default function SignInPage() {
 
   if (session) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Redirecting...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Redirecting...</p>
         </div>
       </div>
     )
   }
 
-  const onSubmit = async (data: UserLoginInput) => {
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
     try {
       setIsLoading(true)
       setError('')
       
       const result = await signIn('credentials', {
-        email: data.email,
-        password: data.password,
+        email: formData.email,
+        password: formData.password,
         redirect: false
       })
 
@@ -64,117 +73,108 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="bg-white shadow-sm">
+      <nav className="bg-card shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <Link href="/" className="text-xl font-bold text-blue-600">
+              <Link href="/" className="text-xl font-bold text-primary">
                 SwiftInvoice
               </Link>
             </div>
             <div className="flex items-center space-x-4">
-              <Link
-                href="/"
-                className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Home
-              </Link>
-              <Link
-                href="/auth/signup"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-              >
-                Sign Up
-              </Link>
+              <Button variant="ghost" asChild>
+                <Link href="/">
+                  Home
+                </Link>
+              </Button>
+              <Button asChild>
+                <Link href="/auth/signup">
+                  Sign Up
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
       </nav>
 
       <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to SwiftInvoice
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
-            <Link
-              href="/auth/signup"
-              className="font-medium text-blue-600 hover:text-blue-500"
-            >
-              create a new account
-            </Link>
-          </p>
-        </div>
-        
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-          {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <div className="text-sm text-red-700">{error}</div>
-            </div>
-          )}
-          
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="email"
-                type="email"
-                autoComplete="email"
-                required
-                {...register('email')}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
-              />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-              )}
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                {...register('password')}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
-              />
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
-              )}
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="text-sm">
+        <Card className="max-w-md w-full">
+          <CardHeader>
+            <CardTitle className="text-center text-3xl font-extrabold">
+              Sign in to SwiftInvoice
+            </CardTitle>
+            <p className="text-center text-sm text-muted-foreground">
+              Or{' '}
               <Link
-                href="/auth/forgot-password"
-                className="font-medium text-blue-600 hover:text-blue-500"
+                href="/auth/signup"
+                className="font-medium text-primary hover:text-primary/80"
               >
-                Forgot your password?
+                create a new account
               </Link>
-            </div>
-          </div>
+            </p>
+          </CardHeader>
+          <CardContent>
+            <form className="space-y-6" onSubmit={onSubmit}>
+              {error && (
+                <Card className="border-destructive/20 bg-destructive/5">
+                  <CardContent className="p-4">
+                    <div className="text-sm text-destructive">{error}</div>
+                  </CardContent>
+                </Card>
+              )}
+          
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-foreground">
+                    Email address
+                  </label>
+                  <Input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="mt-1"
+                    placeholder="Email address"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-foreground">
+                    Password
+                  </label>
+                  <PasswordInput
+                    value={formData.password}
+                    onChange={(value) => setFormData({ ...formData, password: value })}
+                    placeholder="Password"
+                    className="mt-1"
+                  />
+                </div>
+              </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-            >
-              {isLoading ? 'Signing in...' : 'Sign in'}
-            </button>
-          </div>
-        </form>
-        </div>
+              <div className="flex items-center justify-between">
+                <div className="text-sm">
+                  <Link
+                    href="/auth/forgot-password"
+                    className="font-medium text-primary hover:text-primary/80"
+                  >
+                    Forgot your password?
+                  </Link>
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full"
+              >
+                {isLoading ? 'Signing in...' : 'Sign in'}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

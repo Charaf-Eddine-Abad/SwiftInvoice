@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Navigation from '@/components/Navigation'
 import InvoiceForm from '@/components/InvoiceForm'
 import { InvoiceInput, InvoiceFormInput } from '@/lib/validations'
+import { Card, CardContent } from '@/components/ui/card'
 
 interface Client {
   id: string
@@ -93,11 +94,11 @@ export default function EditInvoicePage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Loading...</p>
           </div>
         </div>
       </div>
@@ -107,21 +108,21 @@ export default function EditInvoicePage() {
   if (!session || !initialInvoice) return null
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Navigation />
       <div className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">Edit Invoice</h1>
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
+          <h1 className="text-3xl font-bold text-foreground mb-6">Edit Invoice</h1>
+          <Card>
+            <CardContent className="p-6">
               <InvoiceForm
                 invoice={initialInvoice}
                 clients={clients}
                 onSubmit={handleSubmit}
                 onCancel={handleCancel}
               />
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

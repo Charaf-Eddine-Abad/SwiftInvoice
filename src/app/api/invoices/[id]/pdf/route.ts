@@ -20,7 +20,7 @@ export async function GET(
     
     const { id } = await params
     
-    // Fetch invoice with client and items
+    // Fetch invoice with client, items, organization, and customization
     const invoice = await prisma.invoice.findFirst({
       where: {
         id,
@@ -29,7 +29,12 @@ export async function GET(
       include: {
         client: true,
         invoiceItems: true,
-        user: true,
+        user: {
+          include: {
+            organization: true,
+            invoiceCustomization: true,
+          }
+        },
       }
     })
     
@@ -65,141 +70,290 @@ function generateInvoiceHTML(invoice: any) {
   const taxAmount = (subtotal * Number(invoice.tax || 0)) / 100
   const finalTotal = subtotal + taxAmount - Number(invoice.discount || 0)
   
-  return `
+  // Get customization and organization data
+  const customization = invoice.user?.invoiceCustomization
+  const organization = invoice.user?.organization
+  
+  // Default values if no customization exists
+  const primaryColor = customization?.primaryColor || '#2563eb'
+  const secondaryColor = customization?.secondaryColor || '#1e40af'
+  const accentColor = customization?.accentColor || '#3b82f6'
+  const fontFamily = customization?.fontFamily || 'Inter'
+  const templateStyle = customization?.templateStyle || 'modern'
+  const showLogo = customization?.showLogo !== false
+  const showCompanyInfo = customization?.showCompanyInfo !== false
+  const footerText = customization?.footerText || ''
+  const logoUrl = customization?.logoUrl || ''
+  
+  // Company name from organization or fallback
+  const companyName = organization?.name || 'Your Company'
+  
+  // Generate different templates based on style - matching the preview exactly
+  const generateTemplateHTML = () => {
+    const baseStyles = `
+      @media print {
+        body { margin: 0; }
+        .no-print { display: none !important; }
+      }
+      body { font-family: '${fontFamily}', sans-serif; }
+      .primary-color { background-color: ${primaryColor}; }
+      .secondary-color { background-color: ${secondaryColor}; }
+      .accent-color { color: ${accentColor}; }
+    `
+
+    const companyInfoHTML = showCompanyInfo && organization ? `
+      <div class="px-8 py-6 border-b border-gray-200">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-3">Bill To:</h3>
+            <div class="text-gray-700">
+              <p class="font-medium">${invoice.client.name}</p>
+              ${invoice.client.companyName ? `<p class="text-gray-600">${invoice.client.companyName}</p>` : ''}
+              ${invoice.client.address ? `<p class="text-gray-600">${invoice.client.address}</p>` : ''}
+              <p class="text-gray-600">${invoice.client.email}</p>
+              ${invoice.client.taxId ? `<p class="text-gray-600">Tax ID: ${invoice.client.taxId}</p>` : ''}
+            </div>
+          </div>
+          <div class="md:text-right">
+            <h3 class="text-lg font-semibold text-gray-900 mb-3">Invoice Details:</h3>
+            <div class="space-y-1 text-gray-700">
+              <p><span class="font-medium">Issue Date:</span> ${new Date(invoice.issueDate).toLocaleDateString()}</p>
+              <p><span class="font-medium">Due Date:</span> ${new Date(invoice.dueDate).toLocaleDateString()}</p>
+              <p><span class="font-medium">Status:</span> 
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ml-2 ${invoice.status === 'PAID' ? 'bg-green-100 text-green-800' : invoice.status === 'SENT' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}">
+                  ${invoice.status}
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    ` : ''
+
+    const itemsTableHTML = `
+      <div class="px-8 py-6">
+        <div class="overflow-hidden border border-gray-200 rounded-lg">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Unit Price</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              ${invoice.invoiceItems.map((item: any) => `
+                <tr class="hover:bg-gray-50">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.description}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">${item.quantity}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">$${Number(item.unitPrice).toFixed(2)}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium">$${Number(item.total).toFixed(2)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `
+
+    const totalsHTML = `
+      <div class="px-8 py-6 border-t border-gray-200">
+        <div class="flex justify-end">
+          <div class="w-80">
+            <div class="space-y-2">
+              <div class="flex justify-between text-sm text-gray-600">
+                <span>Subtotal:</span>
+                <span>$${subtotal.toFixed(2)}</span>
+              </div>
+              <div class="flex justify-between text-sm text-gray-600">
+                <span>Tax (${invoice.tax}%):</span>
+                <span>$${taxAmount.toFixed(2)}</span>
+              </div>
+              <div class="flex justify-between text-sm text-gray-600">
+                <span>Discount:</span>
+                <span>$${Number(invoice.discount || 0).toFixed(2)}</span>
+              </div>
+              <div class="border-t border-gray-300 pt-2 mt-3">
+                <div class="flex justify-between text-lg font-semibold text-gray-900">
+                  <span>Total:</span>
+                  <span>$${finalTotal.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+
+
+    const footerHTML = `
+      <div class="px-8 py-6 border-t border-gray-200">
+        <div class="text-center">
+          <p class="text-gray-600 italic">Thank you for your business!</p>
+          <p class="text-sm text-gray-500 mt-2">Generated by ${companyName}</p>
+          ${footerText ? `<p class="text-sm text-gray-500 mt-1">${footerText}</p>` : ''}
+        </div>
+      </div>
+    `
+
+    // Generate different layouts based on template style - EXACTLY matching the preview
+    switch (templateStyle) {
+      case 'classic':
+        return `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
   <title>Invoice ${invoice.invoiceNumber}</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=${fontFamily.replace(' ', '+')}:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    @media print {
-      body { margin: 0; }
-      .no-print { display: none !important; }
-    }
+    ${baseStyles}
+    .classic-border { border: 2px solid ${primaryColor}; }
   </style>
 </head>
-<body class="bg-gray-50 font-sans">
-  <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
-    <!-- Header -->
-    <div class="bg-blue-600 px-8 py-6">
+<body class="bg-white">
+  <div class="max-w-4xl mx-auto classic-border">
+    <div class="bg-white px-8 py-6 border-b border-gray-200">
       <div class="flex justify-between items-center">
         <div>
-          <h1 class="text-3xl font-bold text-white">SwiftInvoice</h1>
-          <p class="text-blue-100 mt-1">Professional Invoicing</p>
+          ${showLogo && logoUrl ? 
+            `<img src="${logoUrl}" alt="Logo" class="h-12 mb-2" />` : 
+            `<h1 class="text-3xl font-bold text-gray-900">${companyName}</h1>`
+          }
+          <p class="text-gray-600 mt-1">Professional Invoicing</p>
         </div>
         <div class="text-right">
-          <h2 class="text-2xl font-bold text-white">INVOICE</h2>
-          <p class="text-blue-100">#${invoice.invoiceNumber}</p>
+          <h2 class="text-2xl font-bold text-gray-900">INVOICE</h2>
+          <p class="text-gray-600">#${invoice.invoiceNumber}</p>
         </div>
       </div>
     </div>
-
-    <!-- Invoice Details -->
-    <div class="px-8 py-6 border-b border-gray-200">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <!-- Bill To -->
-        <div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-3">Bill To:</h3>
-          <div class="text-gray-700">
-            <p class="font-medium">${invoice.client.name}</p>
-            ${invoice.client.companyName ? `<p class="text-gray-600">${invoice.client.companyName}</p>` : ''}
-            ${invoice.client.address ? `<p class="text-gray-600">${invoice.client.address}</p>` : ''}
-            <p class="text-gray-600">${invoice.client.email}</p>
-            ${invoice.client.taxId ? `<p class="text-gray-600">Tax ID: ${invoice.client.taxId}</p>` : ''}
-          </div>
-        </div>
-        
-        <!-- Invoice Info -->
-        <div class="md:text-right">
-          <h3 class="text-lg font-semibold text-gray-900 mb-3">Invoice Details:</h3>
-          <div class="space-y-1 text-gray-700">
-            <p><span class="font-medium">Issue Date:</span> ${new Date(invoice.issueDate).toLocaleDateString()}</p>
-            <p><span class="font-medium">Due Date:</span> ${new Date(invoice.dueDate).toLocaleDateString()}</p>
-            <p><span class="font-medium">Status:</span> 
-              <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                invoice.status === 'PAID' ? 'bg-green-100 text-green-800' :
-                invoice.status === 'SENT' ? 'bg-blue-100 text-blue-800' :
-                invoice.status === 'OVERDUE' ? 'bg-red-100 text-red-800' :
-                'bg-gray-100 text-gray-800'
-              }">${invoice.status}</span>
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Items Table -->
-    <div class="px-8 py-6">
-      <div class="overflow-hidden border border-gray-200 rounded-lg">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Unit Price</th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            ${invoice.invoiceItems.map((item: any) => `
-              <tr class="hover:bg-gray-50">
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.description}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">${item.quantity}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">$${Number(item.unitPrice).toFixed(2)}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium">$${Number(item.total).toFixed(2)}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Totals -->
-    <div class="px-8 py-6 bg-gray-50 border-t border-gray-200">
-      <div class="flex justify-end">
-        <div class="w-80">
-          <div class="space-y-2">
-            <div class="flex justify-between text-sm text-gray-600">
-              <span>Subtotal:</span>
-              <span>$${subtotal.toFixed(2)}</span>
-            </div>
-            <div class="flex justify-between text-sm text-gray-600">
-              <span>Tax (${invoice.tax}%):</span>
-              <span>$${taxAmount.toFixed(2)}</span>
-            </div>
-            <div class="flex justify-between text-sm text-gray-600">
-              <span>Discount:</span>
-              <span>$${Number(invoice.discount || 0).toFixed(2)}</span>
-            </div>
-            <div class="border-t border-gray-300 pt-2 mt-3">
-              <div class="flex justify-between text-lg font-semibold text-gray-900">
-                <span>Total:</span>
-                <span>$${finalTotal.toFixed(2)}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Footer -->
-    <div class="px-8 py-6 bg-gray-100 border-t border-gray-200">
-      <div class="text-center">
-        <p class="text-gray-600 italic">Thank you for your business!</p>
-        <p class="text-sm text-gray-500 mt-2">Generated by SwiftInvoice</p>
-      </div>
-    </div>
+    ${companyInfoHTML}
+    ${itemsTableHTML}
+    ${totalsHTML}
+    ${footerHTML}
   </div>
-  
-  <script>
-    // Auto-print when page loads
-    window.onload = function() {
-      window.print();
-    };
-  </script>
 </body>
 </html>
-  `
+        `
+
+      case 'minimal':
+        return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Invoice ${invoice.invoiceNumber}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=${fontFamily.replace(' ', '+')}:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    ${baseStyles}
+    .minimal-header { background: linear-gradient(135deg, ${primaryColor}, ${secondaryColor}); }
+  </style>
+</head>
+<body class="bg-white">
+  <div class="max-w-3xl mx-auto">
+    <div class="bg-white px-8 py-8 border-b border-gray-200">
+      <div class="text-center">
+        ${showLogo && logoUrl ? 
+          `<img src="${logoUrl}" alt="Logo" class="h-16 mx-auto mb-4" />` : 
+          `<h1 class="text-4xl font-light text-gray-900">${companyName}</h1>`
+        }
+        <h2 class="text-xl font-light mt-2 text-gray-900">INVOICE #${invoice.invoiceNumber}</h2>
+      </div>
+    </div>
+    ${companyInfoHTML}
+    ${itemsTableHTML}
+    ${totalsHTML}
+    ${footerHTML}
+  </div>
+</body>
+</html>
+        `
+
+      case 'professional':
+        return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Invoice ${invoice.invoiceNumber}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=${fontFamily.replace(' ', '+')}:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    ${baseStyles}
+    .professional-header { background: ${primaryColor}; border-bottom: 4px solid ${secondaryColor}; }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <div class="max-w-5xl mx-auto bg-white shadow-2xl">
+    <div class="bg-white px-10 py-8 border-b border-gray-200">
+      <div class="flex justify-between items-center">
+        <div>
+          ${showLogo && logoUrl ? 
+            `<img src="${logoUrl}" alt="Logo" class="h-16 mb-3" />` : 
+            `<h1 class="text-4xl font-bold text-gray-900">${companyName}</h1>`
+          }
+          <p class="text-gray-600 text-lg">Professional Services</p>
+        </div>
+        <div class="text-right">
+          <h2 class="text-3xl font-bold text-gray-900">INVOICE</h2>
+          <p class="text-gray-600 text-lg">#${invoice.invoiceNumber}</p>
+        </div>
+      </div>
+    </div>
+    ${companyInfoHTML}
+    ${itemsTableHTML}
+    ${totalsHTML}
+    ${footerHTML}
+  </div>
+</body>
+</html>
+        `
+
+      default: // modern
+        return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Invoice ${invoice.invoiceNumber}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=${fontFamily.replace(' ', '+')}:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    ${baseStyles}
+  </style>
+</head>
+<body class="bg-gray-50">
+  <div class="max-w-4xl mx-auto bg-white border border-gray-200 rounded-lg overflow-hidden">
+    <div class="bg-white px-8 py-6 border-b border-gray-200">
+      <div class="flex justify-between items-center">
+        <div>
+          ${showLogo && logoUrl ? 
+            `<img src="${logoUrl}" alt="Logo" class="h-12 mb-2" />` : 
+            `<h1 class="text-3xl font-bold text-gray-900">${companyName}</h1>`
+          }
+          <p class="text-gray-600 mt-1">Professional Invoicing</p>
+        </div>
+        <div class="text-right">
+          <h2 class="text-2xl font-bold text-gray-900">INVOICE</h2>
+          <p class="text-gray-600">#${invoice.invoiceNumber}</p>
+        </div>
+      </div>
+    </div>
+    ${companyInfoHTML}
+    ${itemsTableHTML}
+    ${totalsHTML}
+    ${footerHTML}
+  </div>
+</body>
+</html>
+        `
+    }
+  }
+
+  return generateTemplateHTML()
 }
 

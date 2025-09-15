@@ -8,6 +8,8 @@ import Navigation from '@/components/Navigation'
 import ClientForm from '@/components/ClientForm'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 import { ClientInput } from '@/lib/validations'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 
 interface Client {
   id: string
@@ -86,11 +88,11 @@ export default function EditClientPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Loading...</p>
           </div>
         </div>
       </div>
@@ -103,20 +105,19 @@ export default function EditClientPage() {
 
   if (!client) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <Navigation />
         <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
           <div className="px-4 py-6 sm:px-0">
             <div className="text-center">
-              <h1 className="text-2xl font-bold text-gray-900">Client not found</h1>
-              <p className="mt-2 text-gray-600">The client you're trying to edit doesn't exist.</p>
-              <Link
-                href="/clients"
-                className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-              >
-                <ArrowLeftIcon className="h-4 w-4 mr-2" />
-                Back to Clients
-              </Link>
+              <h1 className="text-2xl font-bold text-foreground">Client not found</h1>
+              <p className="mt-2 text-muted-foreground">The client you're trying to edit doesn't exist.</p>
+              <Button asChild className="mt-4">
+                <Link href="/clients">
+                  <ArrowLeftIcon className="h-4 w-4 mr-2" />
+                  Back to Clients
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
@@ -125,7 +126,7 @@ export default function EditClientPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Navigation />
       
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
@@ -133,15 +134,14 @@ export default function EditClientPage() {
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center">
-              <Link
-                href={`/clients/${client.id}`}
-                className="mr-4 text-gray-400 hover:text-gray-600"
-              >
-                <ArrowLeftIcon className="h-6 w-6" />
-              </Link>
+              <Button variant="ghost" size="sm" asChild className="mr-4">
+                <Link href={`/clients/${client.id}`}>
+                  <ArrowLeftIcon className="h-6 w-6" />
+                </Link>
+              </Button>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Edit Client</h1>
-                <p className="mt-1 text-sm text-gray-500">
+                <h1 className="text-3xl font-bold text-foreground">Edit Client</h1>
+                <p className="mt-1 text-sm text-muted-foreground">
                   Update {client.name}'s information
                 </p>
               </div>
@@ -149,15 +149,15 @@ export default function EditClientPage() {
           </div>
 
           {/* Form */}
-          <div className="bg-white shadow sm:rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
+          <Card>
+            <CardContent className="p-6">
               <ClientForm
                 client={client}
                 onSubmit={handleSubmit}
                 onCancel={handleCancel}
               />
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

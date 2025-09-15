@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
+import { Card, CardContent } from '@/components/ui/card'
 
 interface Invoice {
   id: string
@@ -80,10 +81,10 @@ export default function PublicInvoicePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading invoice...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading invoice...</p>
         </div>
       </div>
     )
@@ -91,11 +92,11 @@ export default function PublicInvoicePage() {
 
   if (error || !invoice) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="text-red-600 text-6xl mb-4">⚠️</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Invoice Not Found</h1>
-          <p className="text-gray-600">The invoice you're looking for doesn't exist or has been removed.</p>
+          <div className="text-destructive text-6xl mb-4">⚠️</div>
+          <h1 className="text-2xl font-bold text-foreground mb-2">Invoice Not Found</h1>
+          <p className="text-muted-foreground">The invoice you're looking for doesn't exist or has been removed.</p>
         </div>
       </div>
     )
@@ -107,48 +108,48 @@ export default function PublicInvoicePage() {
   const finalTotal = subtotal + taxAmount - invoice.discount
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-background py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+        <Card className="overflow-hidden">
           {/* Header */}
-          <div className="bg-blue-600 px-8 py-6">
+          <CardContent className="px-8 py-6 border-b border-border">
             <div className="flex justify-between items-center">
               <div>
-                <h1 className="text-3xl font-bold text-white">SwiftInvoice</h1>
-                <p className="text-blue-100 mt-1">Professional Invoicing</p>
+                <h1 className="text-3xl font-bold text-foreground">SwiftInvoice</h1>
+                <p className="text-muted-foreground mt-1">Professional Invoicing</p>
               </div>
               <div className="text-right">
-                <h2 className="text-2xl font-bold text-white">INVOICE</h2>
-                <p className="text-blue-100">#{invoice.invoiceNumber}</p>
+                <h2 className="text-2xl font-bold text-foreground">INVOICE</h2>
+                <p className="text-muted-foreground">#{invoice.invoiceNumber}</p>
               </div>
             </div>
-          </div>
+          </CardContent>
 
           {/* Invoice Details */}
-          <div className="px-8 py-6 border-b border-gray-200">
+          <CardContent className="px-8 py-6 border-b border-border">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Bill To */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Bill To:</h3>
-                <div className="text-gray-700">
+                <h3 className="text-lg font-semibold text-foreground mb-3">Bill To:</h3>
+                <div className="text-foreground">
                   <p className="font-medium">{invoice.client.name}</p>
                   {invoice.client.companyName && (
-                    <p className="text-gray-600">{invoice.client.companyName}</p>
+                    <p className="text-muted-foreground">{invoice.client.companyName}</p>
                   )}
                   {invoice.client.address && (
-                    <p className="text-gray-600">{invoice.client.address}</p>
+                    <p className="text-muted-foreground">{invoice.client.address}</p>
                   )}
-                  <p className="text-gray-600">{invoice.client.email}</p>
+                  <p className="text-muted-foreground">{invoice.client.email}</p>
                   {invoice.client.taxId && (
-                    <p className="text-gray-600">Tax ID: {invoice.client.taxId}</p>
+                    <p className="text-muted-foreground">Tax ID: {invoice.client.taxId}</p>
                   )}
                 </div>
               </div>
               
               {/* Invoice Info */}
               <div className="md:text-right">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Invoice Details:</h3>
-                <div className="space-y-1 text-gray-700">
+                <h3 className="text-lg font-semibold text-foreground mb-3">Invoice Details:</h3>
+                <div className="space-y-1 text-foreground">
                   <p><span className="font-medium">Issue Date:</span> {new Date(invoice.issueDate).toLocaleDateString()}</p>
                   <p><span className="font-medium">Due Date:</span> {new Date(invoice.dueDate).toLocaleDateString()}</p>
                   <p><span className="font-medium">Status:</span> 
@@ -159,53 +160,53 @@ export default function PublicInvoicePage() {
                 </div>
               </div>
             </div>
-          </div>
+          </CardContent>
 
           {/* Items Table */}
-          <div className="px-8 py-6">
-            <div className="overflow-hidden border border-gray-200 rounded-lg">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+          <CardContent className="px-8 py-6">
+            <div className="overflow-hidden border border-border rounded-lg">
+              <table className="min-w-full divide-y divide-border">
+                <thead className="bg-muted">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Unit Price</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Description</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">Quantity</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">Unit Price</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">Total</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-background divide-y divide-border">
                   {invoice.invoiceItems.map((item, index) => (
-                    <tr key={index} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.description}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">{item.quantity}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">${item.unitPrice.toFixed(2)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium">${item.total.toFixed(2)}</td>
+                    <tr key={index} className="hover:bg-muted/50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">{item.description}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground text-right">{item.quantity}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground text-right">${item.unitPrice.toFixed(2)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground text-right font-medium">${item.total.toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          </div>
+          </CardContent>
 
           {/* Totals */}
-          <div className="px-8 py-6 bg-gray-50 border-t border-gray-200">
+          <CardContent className="px-8 py-6 border-t border-border">
             <div className="flex justify-end">
               <div className="w-80">
                 <div className="space-y-2">
-                  <div className="flex justify-between text-sm text-gray-600">
+                  <div className="flex justify-between text-sm text-muted-foreground">
                     <span>Subtotal:</span>
                     <span>${subtotal.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-sm text-gray-600">
+                  <div className="flex justify-between text-sm text-muted-foreground">
                     <span>Tax ({invoice.tax}%):</span>
                     <span>${taxAmount.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-sm text-gray-600">
+                  <div className="flex justify-between text-sm text-muted-foreground">
                     <span>Discount:</span>
                     <span>${invoice.discount.toFixed(2)}</span>
                   </div>
-                  <div className="border-t border-gray-300 pt-2 mt-3">
-                    <div className="flex justify-between text-lg font-semibold text-gray-900">
+                  <div className="border-t border-border pt-2 mt-3">
+                    <div className="flex justify-between text-lg font-semibold text-foreground">
                       <span>Total:</span>
                       <span>${finalTotal.toFixed(2)}</span>
                     </div>
@@ -213,34 +214,17 @@ export default function PublicInvoicePage() {
                 </div>
               </div>
             </div>
-          </div>
+          </CardContent>
 
-          {/* Payment Section */}
-          <div className="px-8 py-6 bg-blue-50 border-t border-blue-200">
-            <div className="text-center">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Options</h3>
-              <div className="space-y-4">
-                <button 
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium text-lg transition-colors"
-                  onClick={() => alert('Payment processing coming soon!')}
-                >
-                  Pay Now (Coming Soon)
-                </button>
-                <p className="text-sm text-gray-600">
-                  Secure payment processing will be available soon. Contact us for alternative payment methods.
-                </p>
-              </div>
-            </div>
-          </div>
 
           {/* Footer */}
-          <div className="px-8 py-6 bg-gray-100 border-t border-gray-200">
+          <CardContent className="px-8 py-6 border-t border-border">
             <div className="text-center">
-              <p className="text-gray-600 italic">Thank you for your business!</p>
-              <p className="text-sm text-gray-500 mt-2">Generated by SwiftInvoice</p>
+              <p className="text-muted-foreground italic">Thank you for your business!</p>
+              <p className="text-sm text-muted-foreground mt-2">Generated by SwiftInvoice</p>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
