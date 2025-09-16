@@ -25,11 +25,6 @@ export async function POST(request: NextRequest) {
         nextRunAt: {
           lte: now
         }
-      },
-      include: {
-        client: true,
-        lineItems: true,
-        user: true
       }
     })
 
@@ -67,8 +62,13 @@ export async function POST(request: NextRequest) {
           invoiceNumber = `INV-${userPrefix}-${timestamp}`
         }
 
+        // Get line items for this recurring invoice
+        const lineItems = await prisma.recurringLineItem.findMany({
+          where: { recurringInvoiceId: recurringInvoice.id }
+        })
+        
         // Calculate totals
-        const itemsTotal = recurringInvoice.lineItems.reduce(
+        const itemsTotal = lineItems.reduce(
           (sum, item) => sum + Number(item.total),
           0
         )
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
 
           // Create invoice items
           await Promise.all(
-            recurringInvoice.lineItems.map(item =>
+            lineItems.map(item =>
               tx.invoiceItem.create({
                 data: {
                   invoiceId: invoice.id,
