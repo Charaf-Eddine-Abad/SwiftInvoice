@@ -21,8 +21,8 @@ export async function POST(request: NextRequest) {
       hasCronSecret: !!process.env.CRON_SECRET,
       hasDatabaseUrl: !!process.env.DATABASE_URL,
       hasPrismaClient: false,
-      databaseConnection: 'unknown',
-      error: null
+      databaseConnection: 'unknown' as string,
+      error: null as string | null
     }
 
     // Test Prisma connection
