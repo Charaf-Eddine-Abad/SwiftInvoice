@@ -32,7 +32,29 @@ jobs:
       - name: Process Recurring Invoices
         run: |
           echo "🔄 Processing recurring invoices..."
-          response=$(curl -s -X POST "${{ secrets.APP_URL }}/api/cron/recurring" \
+          
+          # Debug: Check if secrets are set
+          if [ -z "${{ secrets.APP_URL }}" ]; then
+            echo "❌ APP_URL secret is not set"
+            exit 1
+          fi
+          
+          if [ -z "${{ secrets.CRON_SECRET }}" ]; then
+            echo "❌ CRON_SECRET is not set"
+            exit 1
+          fi
+          
+          # Ensure APP_URL has https:// and no trailing slash
+          APP_URL="${{ secrets.APP_URL }}"
+          if [[ ! "$APP_URL" =~ ^https?:// ]]; then
+            APP_URL="https://$APP_URL"
+          fi
+          APP_URL=$(echo "$APP_URL" | sed 's:/*$::')
+          
+          echo "🔗 Using URL: $APP_URL/api/cron/recurring"
+          echo "🔑 Using secret: ${CRON_SECRET:0:10}..."
+          
+          response=$(curl -s -X POST "$APP_URL/api/cron/recurring" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             -H "Content-Type: application/json" \
             -w "HTTPSTATUS:%{http_code}")
@@ -65,7 +87,29 @@ jobs:
       - name: Send Invoice Reminders
         run: |
           echo "📧 Sending invoice reminders..."
-          response=$(curl -s -X POST "${{ secrets.APP_URL }}/api/cron/reminders" \
+          
+          # Debug: Check if secrets are set
+          if [ -z "${{ secrets.APP_URL }}" ]; then
+            echo "❌ APP_URL secret is not set"
+            exit 1
+          fi
+          
+          if [ -z "${{ secrets.CRON_SECRET }}" ]; then
+            echo "❌ CRON_SECRET is not set"
+            exit 1
+          fi
+          
+          # Ensure APP_URL has https:// and no trailing slash
+          APP_URL="${{ secrets.APP_URL }}"
+          if [[ ! "$APP_URL" =~ ^https?:// ]]; then
+            APP_URL="https://$APP_URL"
+          fi
+          APP_URL=$(echo "$APP_URL" | sed 's:/*$::')
+          
+          echo "🔗 Using URL: $APP_URL/api/cron/reminders"
+          echo "🔑 Using secret: ${CRON_SECRET:0:10}..."
+          
+          response=$(curl -s -X POST "$APP_URL/api/cron/reminders" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             -H "Content-Type: application/json" \
             -w "HTTPSTATUS:%{http_code}")

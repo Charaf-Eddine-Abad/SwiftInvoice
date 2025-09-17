@@ -90,7 +90,17 @@ jobs:
             
             # Test cron test endpoint
             echo "📡 Testing cron test endpoint..."
-            response=$(curl -s -X POST "${{ secrets.APP_URL }}/api/cron/test" \
+            
+            # Ensure APP_URL has https:// and no trailing slash
+            APP_URL="${{ secrets.APP_URL }}"
+            if [[ ! "$APP_URL" =~ ^https?:// ]]; then
+              APP_URL="https://$APP_URL"
+            fi
+            APP_URL=$(echo "$APP_URL" | sed 's:/*$::')
+            
+            echo "🔗 Using URL: $APP_URL/api/cron/test"
+            
+            response=$(curl -s -X POST "$APP_URL/api/cron/test" \
               -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
               -H "Content-Type: application/json" \
               -d '{"test": "cron job test", "timestamp": "'$(date -Iseconds)'"}' \
@@ -128,7 +138,17 @@ jobs:
             
             # Test simple cron endpoint
             echo "📡 Testing simple cron endpoint..."
-            response=$(curl -s -X POST "${{ secrets.APP_URL }}/api/cron/simple-test" \
+            
+            # Ensure APP_URL has https:// and no trailing slash
+            APP_URL="${{ secrets.APP_URL }}"
+            if [[ ! "$APP_URL" =~ ^https?:// ]]; then
+              APP_URL="https://$APP_URL"
+            fi
+            APP_URL=$(echo "$APP_URL" | sed 's:/*$::')
+            
+            echo "🔗 Using URL: $APP_URL/api/cron/simple-test"
+            
+            response=$(curl -s -X POST "$APP_URL/api/cron/simple-test" \
               -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
               -H "Content-Type: application/json" \
               -w "HTTPSTATUS:%{http_code}" || echo "HTTPSTATUS:000")
