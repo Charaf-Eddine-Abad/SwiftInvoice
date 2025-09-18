@@ -51,8 +51,11 @@ export async function GET(
     // Return HTML content that can be converted to PDF on the client side
     return new NextResponse(htmlContent, {
       headers: {
-        'Content-Type': 'text/html',
-        'Content-Disposition': `inline; filename="invoice-${invoice.invoiceNumber}.html"`,
+        'Content-Type': 'text/html; charset=utf-8',
+        'Content-Disposition': `attachment; filename="invoice-${invoice.invoiceNumber}.html"`,
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       },
     })
     

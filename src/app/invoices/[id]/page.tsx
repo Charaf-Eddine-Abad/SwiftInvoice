@@ -78,7 +78,22 @@ export default function InvoiceViewPage() {
       if (response.ok) {
         const htmlContent = await response.text()
         
-        // Create a new window with the HTML content
+        // Create a blob and download as HTML file
+        const blob = new Blob([htmlContent], { type: 'text/html' })
+        const url = window.URL.createObjectURL(blob)
+        
+        // Create a temporary link and trigger download
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `invoice-${invoice?.invoiceNumber || 'unknown'}.html`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        
+        // Clean up the URL object
+        window.URL.revokeObjectURL(url)
+        
+        // Also open in new tab for printing
         const printWindow = window.open('', '_blank')
         if (printWindow) {
           printWindow.document.write(htmlContent)
@@ -93,9 +108,13 @@ export default function InvoiceViewPage() {
             }, 1000)
           }
         }
+      } else {
+        console.error('Failed to generate PDF:', response.status, response.statusText)
+        alert('Failed to generate PDF. Please try again.')
       }
     } catch (error) {
       console.error('Error downloading PDF:', error)
+      alert('Error downloading PDF. Please check your connection and try again.')
     }
   }
 
