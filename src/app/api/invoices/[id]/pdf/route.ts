@@ -20,7 +20,11 @@ export async function GET(
     
     const { id } = await params
     
+    console.log('PDF generation request for invoice ID:', id)
+    
     // Fetch invoice with client, items, organization, and customization
+    console.log('Fetching invoice with ID:', id, 'for user:', session.user.id)
+    
     const invoice = await prisma.invoice.findFirst({
       where: {
         id,
@@ -38,7 +42,10 @@ export async function GET(
       }
     })
     
+    console.log('Invoice found:', !!invoice)
+    
     if (!invoice) {
+      console.log('Invoice not found for ID:', id)
       return NextResponse.json(
         { error: 'Invoice not found' },
         { status: 404 }
@@ -46,7 +53,9 @@ export async function GET(
     }
     
     // Generate HTML content for PDF
+    console.log('Generating HTML content for invoice:', invoice.invoiceNumber)
     const htmlContent = generateInvoiceHTML(invoice)
+    console.log('HTML content generated, length:', htmlContent.length)
     
     // Return HTML content that can be converted to PDF on the client side
     return new NextResponse(htmlContent, {
@@ -62,7 +71,11 @@ export async function GET(
   } catch (error) {
     console.error('Error generating PDF:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { 
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      },
       { status: 500 }
     )
   }

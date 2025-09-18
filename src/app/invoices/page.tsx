@@ -120,8 +120,9 @@ export default function InvoicesPage() {
           }
         }
       } else {
-        console.error('Failed to generate PDF:', response.status, response.statusText)
-        alert('Failed to generate PDF. Please try again.')
+        const errorData = await response.json().catch(() => ({}))
+        console.error('Failed to generate PDF:', response.status, response.statusText, errorData)
+        alert(`Failed to generate PDF (${response.status}): ${errorData.error || response.statusText}`)
       }
     } catch (error) {
       console.error('Error downloading PDF:', error)
