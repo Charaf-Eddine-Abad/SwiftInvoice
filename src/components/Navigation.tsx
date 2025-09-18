@@ -3,20 +3,27 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
-import { 
-  HomeIcon, 
-  UsersIcon, 
-  DocumentTextIcon, 
+import {
+  HomeIcon,
+  UsersIcon,
+  DocumentTextIcon,
   ArrowRightOnRectangleIcon,
   ClockIcon,
   CurrencyDollarIcon,
   BellIcon,
   CreditCardIcon,
-  Cog6ToothIcon
+  Cog6ToothIcon,
+  Bars3Icon
 } from '@heroicons/react/24/outline'
 import ThemeToggle from './ThemeToggle'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 export default function Navigation() {
   const pathname = usePathname()
@@ -40,20 +47,20 @@ export default function Navigation() {
     <nav className="bg-background shadow-sm border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          <div className="flex">
-            <div className="flex-shrink-0 flex items-center">
-              <Link href="/dashboard" className="text-xl font-bold text-primary">
-                SwiftInvoice
-              </Link>
-            </div>
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+          <div className="flex items-center gap-4">
+            <Link href="/dashboard" className="text-xl font-bold text-primary">
+              SwiftInvoice
+            </Link>
+
+            {/* Desktop navigation */}
+            <div className="hidden md:flex md:space-x-6">
               {navigation.map((item) => {
                 const isActive = pathname === item.href
                 return (
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                    className={`inline-flex items-center h-16 -mb-px border-b-2 px-2 text-sm font-medium transition-colors ${
                       isActive
                         ? 'border-primary text-foreground'
                         : 'border-transparent text-muted-foreground hover:border-border hover:text-foreground'
@@ -65,13 +72,32 @@ export default function Navigation() {
                 )
               })}
             </div>
+
+            {/* Mobile menu */}
+            <div className="md:hidden">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="px-2">
+                    <Bars3Icon className="w-5 h-5" />
+                    <span className="sr-only">Open menu</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  {navigation.map((item) => (
+                    <DropdownMenuItem key={item.name} asChild>
+                      <Link href={item.href} className="flex items-center">
+                        <item.icon className="w-4 h-4 mr-2" />
+                        {item.name}
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
-          
-          <div className="flex items-center space-x-4">
+
+          <div className="flex items-center gap-2">
             <ThemeToggle />
-            <span className="text-sm text-muted-foreground">
-              {t('nav.welcome')}, {session.user?.name}
-            </span>
             <Button
               variant="ghost"
               size="sm"
