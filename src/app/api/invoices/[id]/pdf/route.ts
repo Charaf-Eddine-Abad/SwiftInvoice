@@ -54,8 +54,23 @@ export async function GET(
     
     // Generate HTML content for PDF
     console.log('Generating HTML content for invoice:', invoice.invoiceNumber)
-    const htmlContent = generateInvoiceHTML(invoice)
-    console.log('HTML content generated, length:', htmlContent.length)
+    console.log('Invoice data:', {
+      id: invoice.id,
+      invoiceNumber: invoice.invoiceNumber,
+      client: invoice.client?.name,
+      itemsCount: invoice.invoiceItems?.length,
+      hasOrganization: !!invoice.user?.organization,
+      hasCustomization: !!invoice.user?.invoiceCustomization
+    })
+    
+    let htmlContent
+    try {
+      htmlContent = generateInvoiceHTML(invoice)
+      console.log('HTML content generated, length:', htmlContent.length)
+    } catch (htmlError) {
+      console.error('Error generating HTML:', htmlError)
+      throw new Error(`HTML generation failed: ${htmlError instanceof Error ? htmlError.message : 'Unknown error'}`)
+    }
     
     // Return HTML content that can be converted to PDF on the client side
     return new NextResponse(htmlContent, {
@@ -82,9 +97,26 @@ export async function GET(
 }
 
 function generateInvoiceHTML(invoice: any) {
-  const subtotal = invoice.invoiceItems.reduce((sum: number, item: any) => sum + Number(item.total), 0)
-  const taxAmount = (subtotal * Number(invoice.tax || 0)) / 100
-  const finalTotal = subtotal + taxAmount - Number(invoice.discount || 0)
+  try {
+    console.log('Starting HTML generation for invoice:', invoice.invoiceNumber)
+    
+    if (!invoice.invoiceItems || !Array.isArray(invoice.invoiceItems)) {
+      throw new Error('Invoice items not found or not an array')
+    }
+    
+    const subtotal = invoice.invoiceItems.reduce((sum: number, item: any) => {
+      const total = Number(item.total)
+      if (isNaN(total)) {
+        console.warn('Invalid item total:', item)
+        return sum
+      }
+      return sum + total
+    }, 0)
+    
+    const taxAmount = (subtotal * Number(invoice.tax || 0)) / 100
+    const finalTotal = subtotal + taxAmount - Number(invoice.discount || 0)
+    
+    console.log('Calculated totals:', { subtotal, taxAmount, finalTotal })
   
   // Get customization and organization data
   const customization = invoice.user?.invoiceCustomization
@@ -370,6 +402,10 @@ function generateInvoiceHTML(invoice: any) {
     }
   }
 
-  return generateTemplateHTML()
+    return generateTemplateHTML()
+  } catch (error) {
+    console.error('Error in generateInvoiceHTML:', error)
+    throw error
+  }
 }
 
