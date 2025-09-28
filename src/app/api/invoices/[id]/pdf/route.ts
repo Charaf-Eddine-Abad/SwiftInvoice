@@ -8,44 +8,71 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  let errorDetails = { step: 'init', detail: '' }
   try {
+    errorDetails.step = 'session'
     const session = await getServerSession(authOptions)
+    console.log('PDF Route - Session check:', { hasSession: !!session, userId: session?.user?.id })
     
     if (!session?.user?.id) {
+      console.log('PDF Route - No valid session found')
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       )
     }
     
+    errorDetails.step = 'params'
     const { id } = await params
+    console.log('PDF Route - Request params:', { id })
     
-    console.log('PDF generation request for invoice ID:', id)
+    if (!id) {
+      console.log('PDF Route - No invoice ID provided')
+      return NextResponse.json(
+        { error: 'Invoice ID required' },
+        { status: 400 }
+      )
+    }
     
     // Fetch invoice with client, items, organization, and customization
-    console.log('Fetching invoice with ID:', id, 'for user:', session.user.id)
+    errorDetails.step = 'database'
+    console.log('PDF Route - Fetching invoice:', { id, userId: session.user.id })
     
-    const invoice = await prisma.invoice.findFirst({
-      where: {
-        id,
-        userId: session.user.id
-      },
-      include: {
-        client: true,
-        invoiceItems: true,
-        user: {
-          include: {
-            organization: true,
-            invoiceCustomization: true,
-          }
+    let invoice
+    try {
+      invoice = await prisma.invoice.findFirst({
+        where: {
+          id,
+          userId: session.user.id
         },
-      }
+        include: {
+          client: true,
+          invoiceItems: true,
+          user: {
+            include: {
+              organization: true,
+              invoiceCustomization: true,
+            }
+          },
+        }
+      })
+    } catch (dbError) {
+      console.error('PDF Route - Database error:', dbError)
+      errorDetails.detail = `Database error: ${dbError instanceof Error ? dbError.message : 'Unknown'}`
+      throw new Error(`Database query failed: ${dbError instanceof Error ? dbError.message : 'Unknown database error'}`)
+    }
+    
+    console.log('PDF Route - Invoice query result:', { 
+      found: !!invoice,
+      hasClient: !!invoice?.client,
+      itemsCount: invoice?.invoiceItems?.length,
+      hasUser: !!invoice?.user,
+      hasOrg: !!invoice?.user?.organization,
+      hasCustomization: !!invoice?.user?.invoiceCustomization
     })
     
-    console.log('Invoice found:', !!invoice)
-    
     if (!invoice) {
-      console.log('Invoice not found for ID:', id)
+      console.log('PDF Route - Invoice not found:', { id, userId: session.user.id })
       return NextResponse.json(
         { error: 'Invoice not found' },
         { status: 404 }
@@ -53,25 +80,20 @@ export async function GET(
     }
     
     // Generate HTML content for PDF
-    console.log('Generating HTML content for invoice:', invoice.invoiceNumber)
-    console.log('Invoice data:', {
-      id: invoice.id,
-      invoiceNumber: invoice.invoiceNumber,
-      client: invoice.client?.name,
-      itemsCount: invoice.invoiceItems?.length,
-      hasOrganization: !!invoice.user?.organization,
-      hasCustomization: !!invoice.user?.invoiceCustomization
-    })
+    errorDetails.step = 'html_generation'
+    console.log('PDF Route - Starting HTML generation')
     
     let htmlContent
     try {
       htmlContent = generateInvoiceHTML(invoice)
-      console.log('HTML content generated, length:', htmlContent.length)
+      console.log('PDF Route - HTML generated successfully, length:', htmlContent.length)
     } catch (htmlError) {
-      console.error('Error generating HTML:', htmlError)
+      console.error('PDF Route - HTML generation error:', htmlError)
+      errorDetails.detail = `HTML generation error: ${htmlError instanceof Error ? htmlError.message : 'Unknown'}`
       throw new Error(`HTML generation failed: ${htmlError instanceof Error ? htmlError.message : 'Unknown error'}`)
     }
     
+    errorDetails.step = 'response'
     // Return HTML inline so the browser does not force a download
     return new NextResponse(htmlContent, {
       headers: {
@@ -84,12 +106,20 @@ export async function GET(
     })
     
   } catch (error) {
-    console.error('Error generating PDF:', error)
+    console.error('PDF Route - Fatal error:', {
+      step: errorDetails.step,
+      detail: errorDetails.detail,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    })
+    
     return NextResponse.json(
       { 
         error: 'Internal server error',
         details: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
+        step: errorDetails.step,
+        // Include stack trace only in development
+        ...(process.env.NODE_ENV === 'development' && { stack: error instanceof Error ? error.stack : undefined })
       },
       { status: 500 }
     )
