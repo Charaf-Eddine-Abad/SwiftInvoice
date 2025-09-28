@@ -6,7 +6,7 @@ import { prisma } from '@/lib/prisma'
 // GET /api/invoices/[id]/pdf - Generate PDF for an invoice
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -18,7 +18,7 @@ export async function GET(
       )
     }
     
-    const { id } = params
+    const { id } = await params
     
     console.log('PDF generation request for invoice ID:', id)
     
