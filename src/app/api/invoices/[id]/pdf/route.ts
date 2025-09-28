@@ -6,7 +6,7 @@ import { prisma } from '@/lib/prisma'
 // GET /api/invoices/[id]/pdf - Generate PDF for an invoice
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -18,7 +18,7 @@ export async function GET(
       )
     }
     
-    const { id } = await params
+    const { id } = params
     
     console.log('PDF generation request for invoice ID:', id)
     
@@ -100,7 +100,7 @@ function generateInvoiceHTML(invoice: any) {
   try {
     console.log('Starting HTML generation for invoice:', invoice.invoiceNumber)
     
-    if (!invoice.invoiceItems || !Array.isArray(invoice.invoiceItems)) {
+    if (!invoice || !invoice.invoiceItems || !Array.isArray(invoice.invoiceItems)) {
       throw new Error('Invoice items not found or not an array')
     }
     
@@ -119,8 +119,8 @@ function generateInvoiceHTML(invoice: any) {
     console.log('Calculated totals:', { subtotal, taxAmount, finalTotal })
   
   // Get customization and organization data
-  const customization = invoice.user?.invoiceCustomization
-  const organization = invoice.user?.organization
+  const customization = invoice.user?.invoiceCustomization || undefined
+  const organization = invoice.user?.organization || undefined
   
   // Default values if no customization exists
   const primaryColor = customization?.primaryColor || '#2563eb'
@@ -134,7 +134,7 @@ function generateInvoiceHTML(invoice: any) {
   const logoUrl = customization?.logoUrl || ''
   
   // Company name from organization or fallback
-  const companyName = organization?.name || 'Your Company'
+  const companyName = (organization && organization.name) || 'Your Company'
   
   // Generate different templates based on style - matching the preview exactly
   const generateTemplateHTML = () => {
@@ -149,24 +149,25 @@ function generateInvoiceHTML(invoice: any) {
       .accent-color { color: ${accentColor}; }
     `
 
-    const companyInfoHTML = showCompanyInfo && organization ? `
+    const client = invoice.client || {}
+    const companyInfoHTML = showCompanyInfo && organization && client ? `
       <div class="px-8 py-6 border-b border-gray-200">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <h3 class="text-lg font-semibold text-gray-900 mb-3">Bill To:</h3>
             <div class="text-gray-700">
-              <p class="font-medium">${invoice.client.name}</p>
-              ${invoice.client.companyName ? `<p class="text-gray-600">${invoice.client.companyName}</p>` : ''}
-              ${invoice.client.address ? `<p class="text-gray-600">${invoice.client.address}</p>` : ''}
-              <p class="text-gray-600">${invoice.client.email}</p>
-              ${invoice.client.taxId ? `<p class="text-gray-600">Tax ID: ${invoice.client.taxId}</p>` : ''}
+              <p class="font-medium">${client.name || 'Client'}</p>
+              ${client.companyName ? `<p class="text-gray-600">${client.companyName}</p>` : ''}
+              ${client.address ? `<p class="text-gray-600">${client.address}</p>` : ''}
+              ${client.email ? `<p class="text-gray-600">${client.email}</p>` : ''}
+              ${client.taxId ? `<p class="text-gray-600">Tax ID: ${client.taxId}</p>` : ''}
             </div>
           </div>
           <div class="md:text-right">
             <h3 class="text-lg font-semibold text-gray-900 mb-3">Invoice Details:</h3>
             <div class="space-y-1 text-gray-700">
-              <p><span class="font-medium">Issue Date:</span> ${new Date(invoice.issueDate).toLocaleDateString()}</p>
-              <p><span class="font-medium">Due Date:</span> ${new Date(invoice.dueDate).toLocaleDateString()}</p>
+              <p><span class="font-medium">Issue Date:</span> ${invoice.issueDate ? new Date(invoice.issueDate).toLocaleDateString() : '-'}</p>
+              <p><span class="font-medium">Due Date:</span> ${invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : '-'}</p>
               <p><span class="font-medium">Status:</span> 
                 <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ml-2 ${invoice.status === 'PAID' ? 'bg-green-100 text-green-800' : invoice.status === 'SENT' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}">
                   ${invoice.status}
@@ -191,14 +192,14 @@ function generateInvoiceHTML(invoice: any) {
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              ${invoice.invoiceItems.map((item: any) => `
+              ${Array.isArray(invoice.invoiceItems) ? invoice.invoiceItems.map((item: any) => `
                 <tr class="hover:bg-gray-50">
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.description}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">${item.quantity}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">$${Number(item.unitPrice).toFixed(2)}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium">$${Number(item.total).toFixed(2)}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item?.description ?? ''}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">${Number(item?.quantity ?? 0)}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">$${Number(item?.unitPrice ?? 0).toFixed(2)}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium">$${Number(item?.total ?? (Number(item?.quantity ?? 0) * Number(item?.unitPrice ?? 0))).toFixed(2)}</td>
                 </tr>
-              `).join('')}
+              `).join('') : ''}
             </tbody>
           </table>
         </div>
@@ -253,7 +254,7 @@ function generateInvoiceHTML(invoice: any) {
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Invoice ${invoice.invoiceNumber}</title>
+  <title>Invoice ${invoice.invoiceNumber || ''}</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=${fontFamily.replace(' ', '+')}:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -274,7 +275,7 @@ function generateInvoiceHTML(invoice: any) {
         </div>
         <div class="text-right">
           <h2 class="text-2xl font-bold text-gray-900">INVOICE</h2>
-          <p class="text-gray-600">#${invoice.invoiceNumber}</p>
+          <p class="text-gray-600">#${invoice.invoiceNumber || ''}</p>
         </div>
       </div>
     </div>
@@ -293,7 +294,7 @@ function generateInvoiceHTML(invoice: any) {
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Invoice ${invoice.invoiceNumber}</title>
+  <title>Invoice ${invoice.invoiceNumber || ''}</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=${fontFamily.replace(' ', '+')}:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -309,7 +310,7 @@ function generateInvoiceHTML(invoice: any) {
           `<img src="${logoUrl}" alt="Logo" class="h-16 mx-auto mb-4" />` : 
           `<h1 class="text-4xl font-light text-gray-900">${companyName}</h1>`
         }
-        <h2 class="text-xl font-light mt-2 text-gray-900">INVOICE #${invoice.invoiceNumber}</h2>
+        <h2 class="text-xl font-light mt-2 text-gray-900">INVOICE #${invoice.invoiceNumber || ''}</h2>
       </div>
     </div>
     ${companyInfoHTML}
@@ -327,7 +328,7 @@ function generateInvoiceHTML(invoice: any) {
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Invoice ${invoice.invoiceNumber}</title>
+  <title>Invoice ${invoice.invoiceNumber || ''}</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=${fontFamily.replace(' ', '+')}:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -348,7 +349,7 @@ function generateInvoiceHTML(invoice: any) {
         </div>
         <div class="text-right">
           <h2 class="text-3xl font-bold text-gray-900">INVOICE</h2>
-          <p class="text-gray-600 text-lg">#${invoice.invoiceNumber}</p>
+          <p class="text-gray-600 text-lg">#${invoice.invoiceNumber || ''}</p>
         </div>
       </div>
     </div>
@@ -367,7 +368,7 @@ function generateInvoiceHTML(invoice: any) {
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Invoice ${invoice.invoiceNumber}</title>
+  <title>Invoice ${invoice.invoiceNumber || ''}</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=${fontFamily.replace(' ', '+')}:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -387,7 +388,7 @@ function generateInvoiceHTML(invoice: any) {
         </div>
         <div class="text-right">
           <h2 class="text-2xl font-bold text-gray-900">INVOICE</h2>
-          <p class="text-gray-600">#${invoice.invoiceNumber}</p>
+          <p class="text-gray-600">#${invoice.invoiceNumber || ''}</p>
         </div>
       </div>
     </div>
