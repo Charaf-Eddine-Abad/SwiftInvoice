@@ -72,11 +72,11 @@ export async function GET(
       throw new Error(`HTML generation failed: ${htmlError instanceof Error ? htmlError.message : 'Unknown error'}`)
     }
     
-    // Return HTML content that can be converted to PDF on the client side
+    // Return HTML inline so the browser does not force a download
     return new NextResponse(htmlContent, {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
-        'Content-Disposition': `attachment; filename="invoice-${invoice.invoiceNumber}.html"`,
+        // Do not set Content-Disposition to avoid any download hints
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
         'Expires': '0',

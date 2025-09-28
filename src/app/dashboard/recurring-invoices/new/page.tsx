@@ -132,7 +132,9 @@ export default function NewRecurringInvoicePage() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
+        <div className="px-4 sm:px-0">
+        <div className="max-w-4xl mx-auto">
         {error && (
           <Card className="mb-6 border-destructive/20 bg-destructive/5">
             <CardContent className="p-4">
@@ -416,6 +418,8 @@ export default function NewRecurringInvoicePage() {
             </Button>
           </div>
         </form>
+      </div>
+      </div>
       </div>
     </div>
   )

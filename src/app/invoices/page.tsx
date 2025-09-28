@@ -85,40 +85,27 @@ export default function InvoicesPage() {
       const response = await fetch(`/api/invoices/${invoiceId}/pdf`)
       if (response.ok) {
         const htmlContent = await response.text()
-        
-        // Find the invoice to get the invoice number
-        const invoice = invoices.find(inv => inv.id === invoiceId)
-        
-        // Create a blob and download as HTML file
-        const blob = new Blob([htmlContent], { type: 'text/html' })
-        const url = window.URL.createObjectURL(blob)
-        
-        // Create a temporary link and trigger download
-        const link = document.createElement('a')
-        link.href = url
-        link.download = `invoice-${invoice?.invoiceNumber || 'unknown'}.html`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        
-        // Clean up the URL object
-        window.URL.revokeObjectURL(url)
-        
-        // Also open in new tab for printing
-        const printWindow = window.open('', '_blank')
-        if (printWindow) {
-          printWindow.document.write(htmlContent)
-          printWindow.document.close()
-          
-          // Wait for content to load, then trigger print
-          printWindow.onload = () => {
-            printWindow.print()
-            // Close the window after printing
+        // Render into a hidden iframe and print (no download)
+        const iframe = document.createElement('iframe')
+        iframe.style.position = 'fixed'
+        iframe.style.right = '0'
+        iframe.style.bottom = '0'
+        iframe.style.width = '0'
+        iframe.style.height = '0'
+        iframe.style.border = '0'
+        iframe.setAttribute('aria-hidden', 'true')
+        iframe.srcdoc = htmlContent
+        iframe.onload = () => {
+          try {
+            iframe.contentWindow?.focus()
+            iframe.contentWindow?.print()
+          } finally {
             setTimeout(() => {
-              printWindow.close()
+              iframe.remove()
             }, 1000)
           }
         }
+        document.body.appendChild(iframe)
       } else {
         const errorData = await response.json().catch(() => ({}))
         console.error('Failed to generate PDF:', response.status, response.statusText, errorData)
@@ -198,7 +185,7 @@ export default function InvoicesPage() {
                               variant="ghost"
                               size="sm"
                               onClick={() => downloadPDF(invoice.id)}
-                              title="Download PDF"
+                              title="Print PDF"
                             >
                               <DocumentArrowDownIcon className="h-4 w-4" />
                             </Button>

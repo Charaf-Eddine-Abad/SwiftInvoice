@@ -77,37 +77,27 @@ export default function InvoiceViewPage() {
       const response = await fetch(`/api/invoices/${params.id}/pdf`)
       if (response.ok) {
         const htmlContent = await response.text()
-        
-        // Create a blob and download as HTML file
-        const blob = new Blob([htmlContent], { type: 'text/html' })
-        const url = window.URL.createObjectURL(blob)
-        
-        // Create a temporary link and trigger download
-        const link = document.createElement('a')
-        link.href = url
-        link.download = `invoice-${invoice?.invoiceNumber || 'unknown'}.html`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        
-        // Clean up the URL object
-        window.URL.revokeObjectURL(url)
-        
-        // Also open in new tab for printing
-        const printWindow = window.open('', '_blank')
-        if (printWindow) {
-          printWindow.document.write(htmlContent)
-          printWindow.document.close()
-          
-          // Wait for content to load, then trigger print
-          printWindow.onload = () => {
-            printWindow.print()
-            // Close the window after printing
+        // Render into a hidden iframe and print (no download)
+        const iframe = document.createElement('iframe')
+        iframe.style.position = 'fixed'
+        iframe.style.right = '0'
+        iframe.style.bottom = '0'
+        iframe.style.width = '0'
+        iframe.style.height = '0'
+        iframe.style.border = '0'
+        iframe.setAttribute('aria-hidden', 'true')
+        iframe.srcdoc = htmlContent
+        iframe.onload = () => {
+          try {
+            iframe.contentWindow?.focus()
+            iframe.contentWindow?.print()
+          } finally {
             setTimeout(() => {
-              printWindow.close()
+              iframe.remove()
             }, 1000)
           }
         }
+        document.body.appendChild(iframe)
       } else {
         const errorData = await response.json().catch(() => ({}))
         console.error('Failed to generate PDF:', response.status, response.statusText, errorData)
@@ -141,8 +131,9 @@ export default function InvoiceViewPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      <div className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
+          <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
               <Button variant="ghost" asChild>
@@ -155,7 +146,7 @@ export default function InvoiceViewPage() {
             </div>
             <div className="flex gap-2">
               <Button onClick={downloadPDF} variant="default" size="sm">
-                <DocumentArrowDownIcon className="h-4 w-4 mr-2" /> Download PDF
+                <DocumentArrowDownIcon className="h-4 w-4 mr-2" /> Print PDF
               </Button>
               <Button asChild size="sm">
                 <Link href={`/invoices/${invoice.id}/edit`}>
@@ -183,7 +174,7 @@ export default function InvoiceViewPage() {
                 </div>
               </div>
 
-              <div className="overflow-hidden border border-border rounded-md">
+              <div className="overflow-x-auto border border-border rounded-md">
                 <table className="min-w-full divide-y divide-border">
                   <thead className="bg-muted">
                     <tr>
@@ -228,6 +219,7 @@ export default function InvoiceViewPage() {
               </div>
             </CardContent>
           </Card>
+          </div>
         </div>
       </div>
     </div>

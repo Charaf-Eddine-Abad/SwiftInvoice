@@ -109,7 +109,8 @@ export default function PublicInvoicePage() {
 
   return (
     <div className="min-h-screen bg-background py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
         <Card className="overflow-hidden">
           {/* Header */}
           <CardContent className="px-8 py-6 border-b border-border">
@@ -164,7 +165,7 @@ export default function PublicInvoicePage() {
 
           {/* Items Table */}
           <CardContent className="px-8 py-6">
-            <div className="overflow-hidden border border-border rounded-lg">
+            <div className="overflow-x-auto border border-border rounded-lg">
               <table className="min-w-full divide-y divide-border">
                 <thead className="bg-muted">
                   <tr>
@@ -225,6 +226,7 @@ export default function PublicInvoicePage() {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
     </div>
   )

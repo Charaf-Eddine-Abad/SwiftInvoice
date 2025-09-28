@@ -313,7 +313,7 @@ export default function DashboardPage() {
             <CardContent>
               
               {stats?.recentInvoices && stats.recentInvoices.length > 0 ? (
-                <div className="overflow-hidden">
+                <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-border">
                     <thead className="bg-muted">
                       <tr>
