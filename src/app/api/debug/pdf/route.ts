@@ -4,10 +4,7 @@ import { authOptions } from '@/lib/auth-config'
 import { prisma } from '@/lib/prisma'
 
 // Debug endpoint to test PDF generation prerequisites
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id?: string }> }
-) {
+export async function GET(request: NextRequest) {
   const debug = {
     step: 'init',
     session: false,
@@ -21,9 +18,10 @@ export async function GET(
     // Test 1: Session
     debug.step = 'session'
     const session = await getServerSession(authOptions)
-    debug.session = !!session?.user?.id
+    const userId = session?.user?.id
+    debug.session = !!userId
     
-    if (!debug.session) {
+    if (!userId) {
       debug.errors.push('No valid session found')
       return NextResponse.json(debug, { status: 200 })
     }
@@ -43,7 +41,7 @@ export async function GET(
     debug.step = 'user_data'
     try {
       const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
+        where: { id: userId },
         include: {
           organization: true,
           invoiceCustomization: true
@@ -59,7 +57,7 @@ export async function GET(
       // Test 4: Get first invoice for this user
       debug.step = 'invoice_query'
       const invoice = await prisma.invoice.findFirst({
-        where: { userId: session.user.id },
+        where: { userId: userId },
         include: {
           client: true,
           invoiceItems: true,
