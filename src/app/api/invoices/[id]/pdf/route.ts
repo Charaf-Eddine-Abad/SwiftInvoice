@@ -34,41 +34,26 @@ export async function GET(
       )
     }
     
-    // Fetch invoice with client, items, organization, and customization
+    // Fetch invoice with only core tables that definitely exist
     errorDetails.step = 'database'
     console.log('PDF Route - Fetching invoice:', { id, userId: session.user.id })
     
-    let invoice
-    try {
-      invoice = await prisma.invoice.findFirst({
-        where: {
-          id,
-          userId: session.user.id
-        },
-        include: {
-          client: true,
-          invoiceItems: true,
-          user: {
-            include: {
-              organization: true,
-              invoiceCustomization: true,
-            }
-          },
-        }
-      })
-    } catch (dbError) {
-      console.error('PDF Route - Database error:', dbError)
-      errorDetails.detail = `Database error: ${dbError instanceof Error ? dbError.message : 'Unknown'}`
-      throw new Error(`Database query failed: ${dbError instanceof Error ? dbError.message : 'Unknown database error'}`)
-    }
+    // SIMPLIFIED: Only query core tables, skip organization/customization
+    const invoice = await prisma.invoice.findFirst({
+      where: {
+        id,
+        userId: session.user.id
+      },
+      include: {
+        client: true,
+        invoiceItems: true
+      }
+    })
     
     console.log('PDF Route - Invoice query result:', { 
       found: !!invoice,
       hasClient: !!invoice?.client,
-      itemsCount: invoice?.invoiceItems?.length,
-      hasUser: !!invoice?.user,
-      hasOrg: !!invoice?.user?.organization,
-      hasCustomization: !!invoice?.user?.invoiceCustomization
+      itemsCount: invoice?.invoiceItems?.length || 0
     })
     
     if (!invoice) {
@@ -148,23 +133,17 @@ function generateInvoiceHTML(invoice: any) {
     
     console.log('Calculated totals:', { subtotal, taxAmount, finalTotal })
   
-  // Get customization and organization data
-  const customization = invoice.user?.invoiceCustomization || undefined
-  const organization = invoice.user?.organization || undefined
-  
-  // Default values if no customization exists
-  const primaryColor = customization?.primaryColor || '#2563eb'
-  const secondaryColor = customization?.secondaryColor || '#1e40af'
-  const accentColor = customization?.accentColor || '#3b82f6'
-  const fontFamily = customization?.fontFamily || 'Inter'
-  const templateStyle = customization?.templateStyle || 'modern'
-  const showLogo = customization?.showLogo !== false
-  const showCompanyInfo = customization?.showCompanyInfo !== false
-  const footerText = customization?.footerText || ''
-  const logoUrl = customization?.logoUrl || ''
-  
-  // Company name from organization or fallback
-  const companyName = (organization && organization.name) || 'Your Company'
+  // Use default values since we're not querying customization/organization tables
+  const primaryColor = '#2563eb'
+  const secondaryColor = '#1e40af'
+  const accentColor = '#3b82f6'
+  const fontFamily = 'Inter'
+  const templateStyle = 'modern' as string  // Cast to string to fix TS comparison
+  const showLogo = false  // No logo without customization table
+  const showCompanyInfo = false  // No company info without organization table
+  const footerText = ''
+  const logoUrl = ''
+  const companyName = 'Invoice'
   
   // Generate different templates based on style - matching the preview exactly
   const generateTemplateHTML = () => {
@@ -180,7 +159,7 @@ function generateInvoiceHTML(invoice: any) {
     `
 
     const client = invoice.client || {}
-    const companyInfoHTML = showCompanyInfo && organization && client ? `
+    const companyInfoHTML = client ? `
       <div class="px-8 py-6 border-b border-gray-200">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
@@ -211,6 +190,7 @@ function generateInvoiceHTML(invoice: any) {
 
     const itemsTableHTML = `
       <div class="px-8 py-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Items</h3>
         <div class="overflow-hidden border border-gray-200 rounded-lg">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">

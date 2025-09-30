@@ -40,13 +40,25 @@ export async function GET(request: NextRequest) {
     // Test 3: User data
     debug.step = 'user_data'
     try {
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        include: {
-          organization: true,
-          invoiceCustomization: true
+      let user: any
+      try {
+        user = await prisma.user.findUnique({
+          where: { id: userId },
+          include: {
+            organization: true,
+            invoiceCustomization: true
+          }
+        })
+      } catch (userIncludeError) {
+        // Fallback: if org/customization tables missing
+        const msg = userIncludeError instanceof Error ? userIncludeError.message : String(userIncludeError)
+        if (msg.includes('does not exist') && (msg.includes('organizations') || msg.includes('invoice_customizations'))) {
+          debug.errors.push('User include failed due to missing tables; using fallback user query')
+          user = await prisma.user.findUnique({ where: { id: userId } })
+        } else {
+          throw userIncludeError
         }
-      })
+      }
       debug.user = !!user
       
       if (!user) {
@@ -56,19 +68,36 @@ export async function GET(request: NextRequest) {
 
       // Test 4: Get first invoice for this user
       debug.step = 'invoice_query'
-      const invoice = await prisma.invoice.findFirst({
-        where: { userId: userId },
-        include: {
-          client: true,
-          invoiceItems: true,
-          user: {
-            include: {
-              organization: true,
-              invoiceCustomization: true
+      let invoice: any
+      try {
+        invoice = await prisma.invoice.findFirst({
+          where: { userId: userId },
+          include: {
+            client: true,
+            invoiceItems: true,
+            user: {
+              include: {
+                organization: true,
+                invoiceCustomization: true
+              }
             }
           }
+        })
+      } catch (invIncludeError) {
+        const msg = invIncludeError instanceof Error ? invIncludeError.message : String(invIncludeError)
+        if (msg.includes('does not exist') && (msg.includes('organizations') || msg.includes('invoice_customizations'))) {
+          debug.errors.push('Invoice include failed due to missing tables; using fallback invoice query')
+          invoice = await prisma.invoice.findFirst({
+            where: { userId: userId },
+            include: {
+              client: true,
+              invoiceItems: true
+            }
+          })
+        } else {
+          throw invIncludeError
         }
-      })
+      }
 
       debug.invoice = !!invoice
       
