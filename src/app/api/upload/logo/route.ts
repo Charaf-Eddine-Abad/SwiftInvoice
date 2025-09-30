@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-config'
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
-import { existsSync } from 'fs'
 
 export async function POST(request: NextRequest) {
   try {
@@ -47,23 +44,9 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = join(process.cwd(), 'public', 'uploads', 'logos')
-    if (!existsSync(uploadsDir)) {
-      await mkdir(uploadsDir, { recursive: true })
-    }
-
-    // Generate unique filename
-    const timestamp = Date.now()
-    const fileExtension = file.name.split('.').pop()
-    const filename = `${session.user.id}_${timestamp}.${fileExtension}`
-    const filepath = join(uploadsDir, filename)
-
-    // Write file to disk
-    await writeFile(filepath, buffer)
-
-    // Return the public URL
-    const logoUrl = `/uploads/logos/${filename}`
+    // Return a base64 data URL to be stored directly in DB (works on Vercel without filesystem writes)
+    const dataUrl = `data:${file.type};base64,${buffer.toString('base64')}`
+    const logoUrl = dataUrl
 
     return NextResponse.json({ 
       message: 'Logo uploaded successfully',
