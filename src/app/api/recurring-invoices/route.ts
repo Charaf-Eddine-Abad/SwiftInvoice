@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
 
     // Calculate next run date
     const startDate = new Date(validatedData.startDate)
-    let nextRunAt = new Date(startDate)
+    const nextRunAt = new Date(startDate)
     
     if (validatedData.frequency === 'WEEKLY') {
       nextRunAt.setDate(startDate.getDate() + (validatedData.interval * 7))

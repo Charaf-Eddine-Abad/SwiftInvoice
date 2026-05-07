@@ -58,7 +58,7 @@ export async function PUT(request: NextRequest) {
   return handleOrganizationRequest(request, 'PUT')
 }
 
-async function handleOrganizationRequest(request: NextRequest, method: string) {
+async function handleOrganizationRequest(request: NextRequest, _method: string) {
   try {
     const session = await getServerSession(authOptions)
     

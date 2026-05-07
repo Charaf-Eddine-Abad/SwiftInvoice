@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import Navigation from '@/components/Navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -48,7 +47,7 @@ export default function PaymentsPage() {
                 <div className="ml-4">
                   <h3 className="text-lg font-medium text-primary">Payment Processing Coming Soon</h3>
                   <p className="text-primary/80 mt-1">
-                    We're working on integrating secure payment processing. This feature will be available in a future update.
+                    We&apos;re working on integrating secure payment processing. This feature will be available in a future update.
                   </p>
                 </div>
               </div>
@@ -151,7 +150,7 @@ export default function PaymentsPage() {
             </div>
             <DialogTitle>Payments Coming Soon</DialogTitle>
             <DialogDescription>
-              We're working hard to bring you secure payment processing. This feature will be available in a future update.
+              We&apos;re working hard to bring you secure payment processing. This feature will be available in a future update.
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end">

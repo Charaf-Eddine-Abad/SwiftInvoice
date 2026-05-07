@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import ThemeToggle from '@/components/ThemeToggle'
 
 export default function HomePage() {
@@ -19,21 +18,6 @@ export default function HomePage() {
       router.push('/dashboard')
     }
   }, [session, status, router])
-
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (session) {
-    return null
-  }
 
   return (
     <div className="min-h-screen bg-background">

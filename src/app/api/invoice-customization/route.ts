@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-config'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import type { InvoiceCustomization } from '@prisma/client'
 
 // Helpers
 const isDataUrl = (value: string) => /^data:image\/(png|jpeg|jpg|gif|webp);base64,[A-Za-z0-9+/=]+$/.test(value)
@@ -26,7 +27,7 @@ const baseCustomizationSchema = z.object({
 function withDefaults(input: z.infer<typeof baseCustomizationSchema>) {
   const logoUrl = input.logoUrl ?? ''
   if (logoUrl && !(isHttpUrl(logoUrl) || isDataUrl(logoUrl))) {
-    throw new z.ZodError([{ code: 'custom', message: 'Invalid logo URL', path: ['logoUrl'] } as any])
+    throw new z.ZodError([{ code: z.ZodIssueCode.custom, message: 'Invalid logo URL', path: ['logoUrl'] }])
   }
   return {
     logoUrl,
@@ -78,7 +79,7 @@ export async function GET() {
       )
     }
 
-    let customization = null as any
+    let customization: InvoiceCustomization | null = null
     try {
       customization = await prisma.invoiceCustomization.findUnique({
         where: { userId: session.user.id }
@@ -120,7 +121,7 @@ export async function POST(request: NextRequest) {
     const validatedData = withDefaults(parsed)
 
     // Check if customization already exists
-    let existingCustomization = null as any
+    let existingCustomization: InvoiceCustomization | null = null
     try {
       existingCustomization = await prisma.invoiceCustomization.findUnique({
         where: { userId: session.user.id }

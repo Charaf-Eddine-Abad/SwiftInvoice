@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth-config'
 import { prisma } from '@/lib/prisma'
 
 // Debug endpoint to test PDF generation prerequisites
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   const debug = {
     step: 'init',
     session: false,
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     // Test 2: Database connection
     debug.step = 'database_connection'
     try {
-      const testQuery = await prisma.$queryRaw`SELECT 1`
+      await prisma.$queryRaw`SELECT 1`
       debug.database = true
     } catch (dbError) {
       debug.database = false
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     // Test 3: User data
     debug.step = 'user_data'
     try {
-      let user: any
+      let user: Awaited<ReturnType<typeof prisma.user.findUnique>>
       try {
         user = await prisma.user.findUnique({
           where: { id: userId },
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
 
       // Test 4: Get first invoice for this user
       debug.step = 'invoice_query'
-      let invoice: any
+      let invoice: Awaited<ReturnType<typeof prisma.invoice.findFirst>>
       try {
         invoice = await prisma.invoice.findFirst({
           where: { userId: userId },

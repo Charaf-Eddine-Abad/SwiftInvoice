@@ -51,6 +51,7 @@ export default function ClientDetailPage() {
     if (clientId) {
       fetchClient()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, status, router, clientId])
 
   const fetchClient = async () => {
@@ -111,7 +112,7 @@ export default function ClientDetailPage() {
             <Card>
               <CardContent className="text-center p-8">
                 <h1 className="text-2xl font-bold text-foreground">Client not found</h1>
-                <p className="mt-2 text-muted-foreground">The client you're looking for doesn't exist.</p>
+                <p className="mt-2 text-muted-foreground">The client you&apos;re looking for doesn&apos;t exist.</p>
                 <Button asChild className="mt-4">
                   <Link href="/clients">
                     <ArrowLeftIcon className="h-4 w-4 mr-2" />

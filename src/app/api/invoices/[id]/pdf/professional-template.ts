@@ -1,6 +1,30 @@
+interface InvoiceItem {
+  description?: string | null
+  quantity?: number | string | null
+  unitPrice?: number | string | null
+  total?: number | string | null
+}
+
+interface InvoiceTemplateData {
+  invoiceNumber?: string | null
+  issueDate?: Date | string | null
+  dueDate?: Date | string | null
+  status?: string | null
+  tax?: number | string | null
+  discount?: number | string | null
+  invoiceItems?: InvoiceItem[]
+}
+
+interface ClientTemplateData {
+  name?: string | null
+  companyName?: string | null
+  address?: string | null
+  email?: string | null
+}
+
 export function generateProfessionalTemplate(
-  invoice: any, 
-  client: any,
+  invoice: InvoiceTemplateData,
+  client: ClientTemplateData,
   subtotal: number,
   taxAmount: number, 
   finalTotal: number,
@@ -108,7 +132,7 @@ export function generateProfessionalTemplate(
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              ${Array.isArray(invoice.invoiceItems) ? invoice.invoiceItems.map((item: any, index: number) => `
+              ${Array.isArray(invoice.invoiceItems) ? invoice.invoiceItems.map((item: InvoiceItem, index: number) => `
                 <tr class="${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}">
                   <td class="px-6 py-4 text-sm text-gray-900">${item?.description ?? ''}</td>
                   <td class="px-6 py-4 text-sm text-gray-900 text-center">${Number(item?.quantity ?? 0)}</td>

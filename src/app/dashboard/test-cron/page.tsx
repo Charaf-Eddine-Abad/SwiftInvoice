@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 
 export default function TestCronPage() {
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<any>(null)
+  const [result, setResult] = useState<Record<string, unknown> | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const testRecurringCron = async () => {
@@ -126,7 +126,7 @@ export default function TestCronPage() {
                 <h3 className="text-sm font-medium text-yellow-800 mb-2">Note:</h3>
                 <p className="text-sm text-yellow-700">
                   Make sure you have set the <code>CRON_SECRET</code> environment variable. 
-                  If you haven't, add it to your <code>.env</code> file:
+                  If you haven&apos;t, add it to your <code>.env</code> file:
                 </p>
                 <pre className="mt-2 text-xs bg-background p-2 rounded border border-border">
                   CRON_SECRET=your-secret-here

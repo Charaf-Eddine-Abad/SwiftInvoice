@@ -12,9 +12,16 @@ const transporter = nodemailer.createTransport({
 })
 
 // Send invoice reminder email
+interface ReminderInvoice {
+  invoiceNumber?: string | null
+  totalAmount?: string | number | null
+  dueDate?: Date | string | null
+  client?: { name?: string | null } | null
+}
+
 export async function sendInvoiceReminderEmail(
-  clientEmail: string, 
-  invoice: any, 
+  clientEmail: string,
+  invoice: ReminderInvoice,
   reminderDay: number
 ): Promise<void> {
   const isOverdue = reminderDay > 0

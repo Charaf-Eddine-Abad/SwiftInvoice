@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Navigation from '@/components/Navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -69,6 +69,7 @@ export default function ExpensesPage() {
   // Initial load
   useEffect(() => {
     fetchExpenses(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Debounced search effect
@@ -79,6 +80,7 @@ export default function ExpensesPage() {
     }, 300)
 
     return () => clearTimeout(timeoutId)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters])
 
   const fetchExpenses = async (isInitialLoad = false) => {

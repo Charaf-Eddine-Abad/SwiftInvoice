@@ -30,7 +30,13 @@ export async function GET(request: NextRequest) {
     const validatedFilters = expenseFilterSchema.parse(filters)
 
     // Build where clause
-    const where: any = {
+    const where: {
+      userId: string
+      category?: string
+      vendor?: { contains: string; mode: string }
+      date?: { gte?: Date; lte?: Date }
+      amount?: { gte?: number; lte?: number }
+    } = {
       userId: session.user.id
     }
 

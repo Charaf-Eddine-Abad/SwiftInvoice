@@ -22,11 +22,7 @@ export default function SignInPage() {
   const { data: session } = useSession()
   const router = useRouter()
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors }
-  } = useForm<UserLoginInput>({
+  useForm<UserLoginInput>({
     resolver: zodResolver(userLoginSchema)
   })
 
@@ -65,7 +61,7 @@ export default function SignInPage() {
       } else {
         router.push('/dashboard')
       }
-    } catch (error) {
+    } catch (_error) {
       setError('An error occurred. Please try again.')
     } finally {
       setIsLoading(false)

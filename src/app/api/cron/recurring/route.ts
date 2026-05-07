@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
         })
 
         // Calculate next run date
-        let nextRunAt = new Date(recurringInvoice.nextRunAt)
+        const nextRunAt = new Date(recurringInvoice.nextRunAt)
         if (recurringInvoice.frequency === 'WEEKLY') {
           nextRunAt.setDate(nextRunAt.getDate() + (recurringInvoice.interval * 7))
         } else if (recurringInvoice.frequency === 'MONTHLY') {
