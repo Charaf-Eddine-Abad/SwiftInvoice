@@ -14,9 +14,11 @@ const transporter = nodemailer.createTransport({
 // Send invoice reminder email
 interface ReminderInvoice {
   invoiceNumber?: string | null
-  totalAmount?: string | number | null
+  totalAmount?: string | number | { toNumber(): number } | null
+  issueDate?: Date | string | null
   dueDate?: Date | string | null
-  client?: { name?: string | null } | null
+  publicId?: string | null
+  client?: { name?: string | null; email?: string | null } | null
 }
 
 export async function sendInvoiceReminderEmail(
@@ -50,7 +52,7 @@ export async function sendInvoiceReminderEmail(
           </h2>
           
           <p style="color: #4b5563; line-height: 1.6; margin-bottom: 25px;">
-            Hello ${invoice.client.name},
+            Hello ${invoice.client?.name ?? ''},
           </p>
           
           <p style="color: #4b5563; line-height: 1.6; margin-bottom: 25px;">
@@ -66,11 +68,11 @@ export async function sendInvoiceReminderEmail(
             </div>
             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
               <span style="color: #6b7280;">Issue Date:</span>
-              <span style="color: #1f2937; font-weight: 500;">${new Date(invoice.issueDate).toLocaleDateString()}</span>
+              <span style="color: #1f2937; font-weight: 500;">${invoice.issueDate ? new Date(invoice.issueDate as string | Date).toLocaleDateString() : '-'}</span>
             </div>
             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
               <span style="color: #6b7280;">Due Date:</span>
-              <span style="color: #1f2937; font-weight: 500;">${new Date(invoice.dueDate).toLocaleDateString()}</span>
+              <span style="color: #1f2937; font-weight: 500;">${invoice.dueDate ? new Date(invoice.dueDate as string | Date).toLocaleDateString() : '-'}</span>
             </div>
             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
               <span style="color: #6b7280;">Status:</span>

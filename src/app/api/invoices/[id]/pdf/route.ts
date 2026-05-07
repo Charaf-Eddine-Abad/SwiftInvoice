@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth-config'
 import { prisma } from '@/lib/prisma'
 import type { InvoiceCustomization } from '@prisma/client'
 import { generateProfessionalTemplate } from './professional-template'
 
+type DecimalLike = number | string | { toNumber(): number; toString(): string } | null | undefined
+
 interface InvoiceItem {
   description?: string | null
-  quantity?: number | string | null
-  unitPrice?: number | string | null
-  total?: number | string | null
+  quantity?: DecimalLike
+  unitPrice?: DecimalLike
+  total?: DecimalLike
 }
 
 interface InvoiceData {
@@ -17,8 +19,8 @@ interface InvoiceData {
   issueDate?: Date | string | null
   dueDate?: Date | string | null
   status?: string | null
-  tax?: number | string | null
-  discount?: number | string | null
+  tax?: DecimalLike
+  discount?: DecimalLike
   invoiceItems?: InvoiceItem[]
   client?: {
     name?: string | null

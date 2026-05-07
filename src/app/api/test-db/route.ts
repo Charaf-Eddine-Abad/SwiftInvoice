@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth-config'
 
 export async function GET(_request: NextRequest) {
@@ -19,7 +19,7 @@ export async function GET(_request: NextRequest) {
       results.database = 'connected'
     } catch (_e) {
       results.database = 'failed'
-      results.error = `DB: ${e instanceof Error ? e.message : 'Unknown'}`
+      results.error = `DB: ${_e instanceof Error ? _e.message : 'Unknown'}`
     }
 
     // Test session

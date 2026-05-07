@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth-config'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 
 // Debug endpoint to test PDF generation prerequisites
 export async function GET(_request: NextRequest) {
@@ -68,7 +69,8 @@ export async function GET(_request: NextRequest) {
 
       // Test 4: Get first invoice for this user
       debug.step = 'invoice_query'
-      let invoice: Awaited<ReturnType<typeof prisma.invoice.findFirst>>
+      type InvoiceWithRelations = Prisma.InvoiceGetPayload<{ include: { client: true; invoiceItems: true; user: { include: { organization: true; invoiceCustomization: true } } } }>
+      let invoice: InvoiceWithRelations | null
       try {
         invoice = await prisma.invoice.findFirst({
           where: { userId: userId },
@@ -93,7 +95,7 @@ export async function GET(_request: NextRequest) {
               client: true,
               invoiceItems: true
             }
-          })
+          }) as unknown as InvoiceWithRelations | null
         } else {
           throw invIncludeError
         }

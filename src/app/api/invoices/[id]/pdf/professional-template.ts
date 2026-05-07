@@ -1,8 +1,10 @@
+type DecimalLike = number | string | { toNumber(): number; toString(): string } | null | undefined
+
 interface InvoiceItem {
   description?: string | null
-  quantity?: number | string | null
-  unitPrice?: number | string | null
-  total?: number | string | null
+  quantity?: DecimalLike
+  unitPrice?: DecimalLike
+  total?: DecimalLike
 }
 
 interface InvoiceTemplateData {
@@ -10,8 +12,8 @@ interface InvoiceTemplateData {
   issueDate?: Date | string | null
   dueDate?: Date | string | null
   status?: string | null
-  tax?: number | string | null
-  discount?: number | string | null
+  tax?: number | string | { toNumber(): number; toString(): string } | null
+  discount?: number | string | { toNumber(): number; toString(): string } | null
   invoiceItems?: InvoiceItem[]
 }
 

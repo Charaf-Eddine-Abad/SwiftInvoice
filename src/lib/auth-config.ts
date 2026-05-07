@@ -4,7 +4,6 @@ import { prisma } from './prisma'
 import { verifyPassword } from './auth'
 
 export const authOptions: NextAuthOptions = {
-  // adapter: PrismaAdapter(prisma), // Temporarily disabled for build compatibility
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -26,7 +25,6 @@ export const authOptions: NextAuthOptions = {
             return null
           }
 
-          // Check if email is verified
           if (!user.emailVerified) {
             throw new Error('Please verify your email before signing in')
           }

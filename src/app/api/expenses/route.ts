@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth-config'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 import { expenseSchema, expenseFilterSchema } from '@/lib/validations'
 
 // GET /api/expenses - Get all expenses for the user with optional filters
@@ -30,24 +31,18 @@ export async function GET(request: NextRequest) {
     const validatedFilters = expenseFilterSchema.parse(filters)
 
     // Build where clause
-    const where: {
-      userId: string
-      category?: string
-      vendor?: { contains: string; mode: string }
-      date?: { gte?: Date; lte?: Date }
-      amount?: { gte?: number; lte?: number }
-    } = {
+    const where: Prisma.ExpenseWhereInput = {
       userId: session.user.id
     }
 
     if (validatedFilters.category) {
-      where.category = validatedFilters.category
+      where.category = validatedFilters.category as Prisma.ExpenseWhereInput['category']
     }
 
     if (validatedFilters.vendor) {
       where.vendor = {
         contains: validatedFilters.vendor,
-        mode: 'insensitive'
+        mode: 'insensitive' as const
       }
     }
 
