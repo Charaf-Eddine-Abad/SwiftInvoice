@@ -20,7 +20,7 @@ interface InvoiceFormProps {
 
 export default function InvoiceForm({ invoice, clients, onSubmit, onCancel }: InvoiceFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [defaultValues, setDefaultValues] = useState({
+  const [_defaultValues, setDefaultValues] = useState({
     tax: 0,
     discount: 0
   })

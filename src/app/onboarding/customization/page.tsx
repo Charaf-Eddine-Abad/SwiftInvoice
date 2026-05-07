@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import Image from 'next/image'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
@@ -38,7 +39,7 @@ const templateStyles = [
 
 
 export default function InvoiceCustomizationPage() {
-  const { data: session, status } = useSession()
+  const { status } = useSession()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -454,10 +455,13 @@ export default function InvoiceCustomizationPage() {
                     )}
                     {customization.logoUrl && (
                       <div className="mt-2">
-                        <img
+                        <Image
                           src={customization.logoUrl}
                           alt="Current logo"
+                          width={64}
+                          height={64}
                           className="h-16 w-auto border rounded"
+                          unoptimized
                         />
                       </div>
                     )}
@@ -478,10 +482,13 @@ export default function InvoiceCustomizationPage() {
                     </p>
                     {customization.logoUrl && (
                       <div className="mt-2">
-                        <img
+                        <Image
                           src={customization.logoUrl}
                           alt="Current logo"
+                          width={64}
+                          height={64}
                           className="h-16 w-auto border rounded"
+                          unoptimized
                         />
                       </div>
                     )}

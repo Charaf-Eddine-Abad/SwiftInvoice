@@ -69,6 +69,7 @@ export default function EditRecurringInvoicePage() {
       fetchRecurringInvoice()
       fetchClients()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id])
 
   const fetchRecurringInvoice = async () => {
@@ -88,7 +89,7 @@ export default function EditRecurringInvoicePage() {
         startDate: new Date(data.startDate).toISOString().split('T')[0],
         tax: Number(data.tax),
         discount: Number(data.discount),
-        lineItems: data.lineItems.map((item: any) => ({
+        lineItems: data.lineItems.map((item: { description: string; quantity: string | number; unitPrice: string | number }) => ({
           description: item.description,
           quantity: Number(item.quantity),
           unitPrice: Number(item.unitPrice)

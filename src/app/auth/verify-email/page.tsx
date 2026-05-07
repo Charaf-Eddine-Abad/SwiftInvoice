@@ -54,7 +54,7 @@ function VerifyEmailForm() {
       } else {
         setError(result.error || 'Verification failed')
       }
-    } catch (error) {
+    } catch (_error) {
       setError('An error occurred. Please try again.')
     } finally {
       setIsSubmitting(false)
@@ -75,7 +75,7 @@ function VerifyEmailForm() {
               Verify Your Email
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              We've sent a 6-digit verification code to your email address
+              We&apos;ve sent a 6-digit verification code to your email address
             </p>
           </CardHeader>
           

@@ -42,6 +42,7 @@ export default function EditClientPage() {
     if (clientId) {
       fetchClient()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, status, router, clientId])
 
   const fetchClient = async () => {
@@ -111,7 +112,7 @@ export default function EditClientPage() {
           <div className="px-4 py-6 sm:px-0">
             <div className="text-center">
               <h1 className="text-2xl font-bold text-foreground">Client not found</h1>
-              <p className="mt-2 text-muted-foreground">The client you're trying to edit doesn't exist.</p>
+              <p className="mt-2 text-muted-foreground">The client you&apos;re trying to edit doesn&apos;t exist.</p>
               <Button asChild className="mt-4">
                 <Link href="/clients">
                   <ArrowLeftIcon className="h-4 w-4 mr-2" />
@@ -142,7 +143,7 @@ export default function EditClientPage() {
               <div>
                 <h1 className="text-3xl font-bold text-foreground">Edit Client</h1>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Update {client.name}'s information
+                  Update {client.name}&apos;s information
                 </p>
               </div>
             </div>

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
 import { useLanguage } from '@/contexts/LanguageContext'
 import PasswordInput from '@/components/PasswordInput'
 import Navigation from '@/components/Navigation'
@@ -46,9 +45,8 @@ interface User {
 }
 
 export default function SettingsPage() {
-  const { data: session, update } = useSession()
-  const router = useRouter()
-  const { t, language, setLanguage } = useLanguage()
+  const { data: session } = useSession()
+  const { t } = useLanguage()
   const [activeTab, setActiveTab] = useState('profile')
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
@@ -317,7 +315,7 @@ function ProfileOrganizationTab({ user, onUpdate }: { user: User | null, onUpdat
 
 // Invoice & Branding Tab Component
 function InvoiceBrandingTab({ user, onUpdate }: { user: User | null, onUpdate: () => void }) {
-  const [customization, setCustomization] = useState(user?.invoiceCustomization || {
+  const [customization, _setCustomization] = useState(user?.invoiceCustomization || {
     primaryColor: '#2563eb',
     secondaryColor: '#1e40af',
     accentColor: '#3b82f6',
@@ -356,7 +354,7 @@ function InvoiceBrandingTab({ user, onUpdate }: { user: User | null, onUpdate: (
     loadPreferences()
   }, [])
 
-  const handleSaveCustomization = async () => {
+  const _handleSaveCustomization = async () => {
     try {
       const response = await fetch('/api/invoice-customization', {
         method: 'PUT',
@@ -474,7 +472,7 @@ function InvoiceBrandingTab({ user, onUpdate }: { user: User | null, onUpdate: (
 }
 
 // Security & Privacy Tab Component
-function SecurityPrivacyTab({ user }: { user: User | null }) {
+function SecurityPrivacyTab({ user: _user }: { user: User | null }) {
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: '',
     newPassword: '',
@@ -510,7 +508,7 @@ function SecurityPrivacyTab({ user }: { user: User | null }) {
       } else {
         setErrors(prev => ({ ...prev, currentPassword: 'Current password is incorrect' }))
       }
-    } catch (error) {
+    } catch (_error) {
       setErrors(prev => ({ ...prev, currentPassword: 'Error validating password' }))
     }
   }

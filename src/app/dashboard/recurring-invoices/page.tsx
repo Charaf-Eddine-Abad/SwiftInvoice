@@ -5,7 +5,6 @@ import Link from 'next/link'
 import Navigation from '@/components/Navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 interface RecurringInvoice {
   id: string
@@ -90,7 +89,7 @@ export default function RecurringInvoicesPage() {
     }
   }
 
-  const getTotalAmount = (lineItems: any[], tax: number, discount: number) => {
+  const getTotalAmount = (lineItems: { total?: string | number }[], tax: number, discount: number) => {
     const subtotal = lineItems.reduce((sum, item) => sum + Number(item.total), 0)
     const taxAmount = (subtotal * Number(tax)) / 100
     return subtotal + taxAmount - Number(discount)

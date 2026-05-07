@@ -48,7 +48,7 @@ export default function ForgotPasswordPage() {
       } else {
         setError(result.error || 'Failed to send reset code')
       }
-    } catch (error) {
+    } catch (_error) {
       setError('An error occurred. Please try again.')
     } finally {
       setIsSubmitting(false)
@@ -69,7 +69,7 @@ export default function ForgotPasswordPage() {
               Forgot Password
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              Enter your email address and we'll send you a code to reset your password
+              Enter your email address and we&apos;ll send you a code to reset your password
             </p>
           </CardHeader>
           
