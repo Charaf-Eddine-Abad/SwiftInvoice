@@ -96,7 +96,7 @@ export default function PublicInvoicePage() {
         <div className="text-center">
           <div className="text-destructive text-6xl mb-4">⚠️</div>
           <h1 className="text-2xl font-bold text-foreground mb-2">Invoice Not Found</h1>
-          <p className="text-muted-foreground">The invoice you're looking for doesn't exist or has been removed.</p>
+          <p className="text-muted-foreground">The invoice you&apos;re looking for doesn&apos;t exist or has been removed.</p>
         </div>
       </div>
     )

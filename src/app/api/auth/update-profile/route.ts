@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth-config'
 import { prisma } from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
 
 export async function PUT(request: NextRequest) {
   try {

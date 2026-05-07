@@ -61,7 +61,7 @@ export default function DashboardPage() {
           clientsResponse.json()
         ])
 
-        const totalRevenue = invoices.reduce((sum: number, invoice: any) => {
+        const totalRevenue = invoices.reduce((sum: number, invoice: { totalAmount: string | number }) => {
           return sum + Number(invoice.totalAmount)
         }, 0)
 

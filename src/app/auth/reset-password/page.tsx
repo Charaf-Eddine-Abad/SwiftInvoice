@@ -55,7 +55,7 @@ function ResetPasswordForm() {
       } else {
         setError(result.error || 'Password reset failed')
       }
-    } catch (error) {
+    } catch (_error) {
       setError('An error occurred. Please try again.')
     } finally {
       setIsSubmitting(false)

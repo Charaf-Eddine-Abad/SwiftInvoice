@@ -24,11 +24,7 @@ export default function SignUpPage() {
   const { data: session } = useSession()
   const router = useRouter()
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors }
-  } = useForm<UserRegistrationInput>({
+  useForm<UserRegistrationInput>({
     resolver: zodResolver(userRegistrationSchema)
   })
 
@@ -76,7 +72,7 @@ export default function SignUpPage() {
           router.push(`/auth/verify-email?email=${encodeURIComponent(formData.email)}`)
         }, 2000)
       }
-    } catch (error) {
+    } catch (_error) {
       setError('An error occurred. Please try again.')
     } finally {
       setIsLoading(false)

@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Navigation from '@/components/Navigation'
 import { ArrowLeftIcon, DocumentArrowDownIcon, PencilIcon } from '@heroicons/react/24/outline'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
 interface InvoiceItem {
@@ -51,6 +51,7 @@ export default function InvoiceViewPage() {
       return
     }
     fetchInvoice()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, status, router])
 
   const fetchInvoice = async () => {

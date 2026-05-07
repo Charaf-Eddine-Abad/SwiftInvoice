@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth-config'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
@@ -58,7 +58,7 @@ export async function PUT(request: NextRequest) {
   return handleOrganizationRequest(request, 'PUT')
 }
 
-async function handleOrganizationRequest(request: NextRequest, method: string) {
+async function handleOrganizationRequest(request: NextRequest, _method: string) {
   try {
     const session = await getServerSession(authOptions)
     

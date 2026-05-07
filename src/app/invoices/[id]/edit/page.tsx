@@ -29,6 +29,7 @@ export default function EditInvoicePage() {
       return
     }
     Promise.all([fetchClients(), fetchInvoice()]).finally(() => setLoading(false))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, status, router])
 
   const fetchClients = async () => {
@@ -53,7 +54,7 @@ export default function EditInvoicePage() {
           dueDate: new Date(data.dueDate).toISOString().split('T')[0],
           tax: Number(data.tax || 0),
           discount: Number(data.discount || 0),
-          items: (data.invoiceItems || []).map((it: any) => ({
+          items: (data.invoiceItems || []).map((it: { description: string; quantity: string | number; unitPrice: string | number }) => ({
             description: it.description,
             quantity: Number(it.quantity),
             unitPrice: Number(it.unitPrice),
